@@ -1,14 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
-import { getActiveUserName } from '../helpers/index';
-import './Home.css';
+// import { getActiveUserName } from '../helpers/index';
+// import './Home.css';
 
 const Home = () => {
-  const activeUserName = getActiveUserName();
+  // const activeUserName = getActiveUserName();
 
-  if (activeUserName) {
-    return null;
-  }
+  // if (activeUserName) {
+  //   return null;
+  // }
 
   return (
     <div className="home">

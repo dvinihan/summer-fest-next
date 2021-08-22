@@ -17,5 +17,10 @@ module.exports = {
     'comma-dangle': 'off',
     'react/jsx-one-expression-per-line': 'off',
     'react/jsx-curly-newline': 'off',
+    'object-curly-newline': 'off',
+    'no-plusplus': 'off',
+    'operator-linebreak': 'off',
+    'no-confusing-arrow': 'off',
+    'function-paren-newline': 'off',
   },
 };
