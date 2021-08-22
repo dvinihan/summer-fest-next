@@ -15,5 +15,7 @@ module.exports = {
   rules: {
     'implicit-arrow-linebreak': 'off',
     'comma-dangle': 'off',
+    'react/jsx-one-expression-per-line': 'off',
+    'react/jsx-curly-newline': 'off',
   },
 };
