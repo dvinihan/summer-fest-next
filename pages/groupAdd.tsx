@@ -1,87 +1,68 @@
-import React, { useState } from 'react';
-import { useMutation } from 'react-query';
-import axios from 'axios';
+import React, { useEffect } from 'react';
 import { getActiveUserClearance } from '../helpers';
 import Group from '../models/Group';
+import GroupForm from '../components/GroupForm';
+import { useMutation } from 'react-query';
+import axios from 'axios';
+import router from 'next/router';
+import Loading from '../components/Loading';
 
-const GroupAdd = ({ groups = [] }) => {
-  const [group, setGroup] = useState(new Group());
+interface Props {
+  groups: Group[];
+}
+
+const GroupAdd = ({ groups }: Props) => {
+  const maxGroupId = groups.reduce((max, group) => Math.max(max, group.id), 0);
+  const newGroupId = maxGroupId + 1;
 
   const mutation = useMutation((newGroup: Group) =>
     axios.post('/api/addGroup', newGroup)
   );
 
-  const handleChange = (e) => {
-    setGroup({ ...group, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      router.push(`/groupEdit?id=${newGroupId}`);
+    }
+  });
 
-  const handleAddGroup = () => {
-    const maxGroupId = groups.reduce(
-      (max, group) => Math.max(max, group.id),
-      0
-    );
-
+  const handleAddGroup = (group: Group) => {
     mutation.mutate({
-      id: maxGroupId + 1,
+      id: newGroupId,
       group_name: group.group_name,
       leader_name: group.leader_name,
     });
   };
 
-  // if (mutation.data) {
-  //   return (
-  //     <Redirect
-  //       to={{
-  //         pathname: '/groupEdit',
-  //       }}
-  //     />
-  //   );
-  // }
-
-  // const activeUserClearance = getActiveUserClearance();
   // const activeUserClearance = getActiveUserClearance();
   // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
   //   router.replace('/');
   //   return null;
   // }
 
+  if (!mutation.isIdle) {
+    return <Loading />;
+  }
+
   return (
-    <div className="container">
-      <h3>Group Name:</h3>
-      <input
-        onChange={handleChange}
-        className="group-add-input"
-        name="group_name"
-      />
+    <div>
+      <GroupForm onSave={handleAddGroup} />
 
-      <h3>Leader Name:</h3>
-      <input
-        onChange={handleChange}
-        className="group-add-input"
-        name="leader_name"
-      />
-      <br />
-
-      <button className="save-button" type="button" onClick={handleAddGroup}>
-        Save
-      </button>
-
-      {mutation.error && (
+      {mutation.isError && (
         <div id="error">There&apos;s been an error. Please try again.</div>
       )}
     </div>
   );
 };
 
-export async function getStaticProps() {
+export const getServerSideProps = async () => {
   const { BASE_URL } = process.env;
 
   const res = await fetch(`${BASE_URL}/api/groups`);
   const json = await res.json();
 
   return {
-    props: json,
+    props: { groups: json },
   };
-}
+};
 
 export default GroupAdd;

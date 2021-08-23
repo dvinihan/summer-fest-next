@@ -2,9 +2,10 @@ import connectToDatabase from '../../util/mongodb';
 
 export default async (req, res) => {
   const { db } = await connectToDatabase();
-  const groups = await db.collection('groups').find({}).toArray();
 
-  res.json({
-    groups: JSON.parse(JSON.stringify(groups)),
-  });
+  const groupId = parseInt(req.query.id);
+  const query = groupId ? { id: groupId } : {};
+
+  const groups = await db.collection('groups').find(query).toArray();
+  res.json(groups);
 };

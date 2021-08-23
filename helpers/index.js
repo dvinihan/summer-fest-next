@@ -21,9 +21,3 @@ export function getActiveUserName() {
   }
   return undefined;
 }
-// export function setActiveCamperId(camperId) {
-//   sessionStorage.setItem('camper_id', camperId);
-// }
-// export function getActiveCamperId() {
-//   return sessionStorage.getItem('camper_id');
-// }

@@ -1,4 +1,6 @@
 class Camper {
+  id: number;
+  group_id: number;
   first_name: string;
   last_name: string;
   gender: string;
@@ -19,6 +21,7 @@ class Camper {
   camp_attending: string;
   covid_image_type: string;
   covid_image: string;
+  covid_image_file_name: string;
 
   // constructor(props = {}) {
   //   this.first_name = props.first_name;

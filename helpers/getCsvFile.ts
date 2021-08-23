@@ -1,4 +1,8 @@
-const convertArrayOfObjectsToCSV = (data, isAdmin, groups) => {
+import Camper from '../models/Camper';
+import Group from '../models/Group';
+import User from '../models/User';
+
+const convertArrayOfObjectsToCSV = (data, isAdmin, groups?) => {
   if (data && data.length > 0) {
     let keys = Object.keys(data[0]);
     keys = keys.filter((key) => key !== 'password');
@@ -38,7 +42,17 @@ const convertArrayOfObjectsToCSV = (data, isAdmin, groups) => {
   return null;
 };
 
-const getCsvFile = ({ users, groups, campers, isAdmin }) =>
+const getCsvFile = ({
+  users,
+  groups,
+  campers,
+  isAdmin = false,
+}: {
+  users?: User[];
+  groups?: Group[];
+  campers?: Camper[];
+  isAdmin?: boolean;
+}) =>
   convertArrayOfObjectsToCSV(users, isAdmin) +
   convertArrayOfObjectsToCSV(groups, isAdmin) +
   convertArrayOfObjectsToCSV(campers, isAdmin, groups);

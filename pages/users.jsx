@@ -19,10 +19,7 @@ const Users = () => {
       .then((d) => {
         setData(d);
       })
-      .catch((err) => {
-        console.log(err);
-        return null;
-      });
+      .catch(() => null);
   });
 
   const handleMakeAdmin = (userId) => {

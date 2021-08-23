@@ -1,5 +1,6 @@
 class User {
-  constructor(props = {}) {}
+  group_id: number;
+  username: string;
 }
 
 export default User;

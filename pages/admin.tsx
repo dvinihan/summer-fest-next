@@ -70,8 +70,6 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
   //   return null;
   // }
 
-  console.log(users);
-
   return (
     <AdminContainer>
       <AdminTable>
@@ -86,7 +84,7 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
             group.id === 1 ? null : (
               <TableRow key={group.id}>
                 <TableData>
-                  <AdminLink href="/groupEdit">Edit</AdminLink>
+                  <AdminLink href={`/groupEdit?id=${group.id}`}>Edit</AdminLink>
                 </TableData>
                 <TableData>{group.group_name}</TableData>
                 <TableData>{group.leader_name}</TableData>
