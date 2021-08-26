@@ -1,17 +1,6 @@
-import React, { MouseEventHandler, useState } from 'react';
-import styled from 'styled-components';
+import { Button, Container, Grid, Paper, TextField } from '@material-ui/core';
+import React, { useState } from 'react';
 import Group from '../models/Group';
-
-const GroupFormContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-`;
-
-const StyledTitle = styled.h3`
-  font-size: 16px;
-  margin: 0 10px;
-`;
 
 interface Props {
   initialGroup?: Group;
@@ -28,23 +17,36 @@ export const GroupForm = ({ initialGroup, onSave }: Props) => {
   const handleSave = () => onSave(group);
 
   return (
-    <GroupFormContainer>
-      <StyledTitle>Group Name:</StyledTitle>
-      <input
-        onChange={handleChange}
-        value={group.group_name}
-        name="group_name"
-      />
+    <Paper>
+      <Grid container justifyContent="center" alignItems="center">
+        <Grid item>
+          <TextField
+            id="standard-basic"
+            label="Group"
+            onChange={handleChange}
+            value={group.group_name}
+            name="group_name"
+          />
+        </Grid>
+        <Grid item>
+          <TextField
+            id="standard-basic"
+            label="Leader"
+            onChange={handleChange}
+            value={group.leader_name}
+            name="leader_name"
+          />
+        </Grid>
+      </Grid>
 
-      <StyledTitle>Leader Name:</StyledTitle>
-      <input
-        onChange={handleChange}
-        value={group.leader_name}
-        name="leader_name"
-      />
-
-      <button onClick={handleSave}>Save</button>
-    </GroupFormContainer>
+      <Grid container justifyContent="center" alignItems="center">
+        <Grid item>
+          <Button variant="contained" onClick={handleSave}>
+            Save
+          </Button>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 };
 

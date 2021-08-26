@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import Error from './Error';
-import { Redirect } from 'react-router-dom';
-import { addCamper } from '../services/camper-service';
-import { getActiveGroupId, getActiveUserClearance } from '../helpers';
-import './CamperForm.css';
+// import { addCamper } from '../services/camper-service';
 import ImageViewer from 'react-simple-image-viewer';
-import Camper from './models/Camper';
+import { getActiveUserClearance } from '../helpers';
+import Camper from '../models/Camper';
+import { useRouter } from 'next/router';
 
 const CamperAdd = () => {
+  const router = useRouter();
+  const groupId = router.query.groupId;
+
   const [showFileTypeError, setShowFileTypeError] = useState(false);
   const [camper, setCamper] = useState(
     new Camper({ signed_status: 'Not Sent' })
   );
-  const [error, setError] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   const handleChange = (e) => {
@@ -40,7 +39,6 @@ const CamperAdd = () => {
     reader.readAsDataURL(e.target.files[0]);
   };
 
-  const activeGroupId = getActiveGroupId();
   const activeUserClearance = getActiveUserClearance();
 
   const handleAddCamper = () => {
@@ -75,25 +73,25 @@ const CamperAdd = () => {
     });
   };
 
-  if (shouldRedirect) {
-    return (
-      <Redirect
-        to={{
-          pathname: '/groupEdit',
-        }}
-      />
-    );
-  }
+  // if (shouldRedirect) {
+  //   return (
+  //     <Redirect
+  //       to={{
+  //         pathname: '/groupEdit',
+  //       }}
+  //     />
+  //   );
+  // }
 
-  if (!activeUserClearance) {
-    return (
-      <Redirect
-        to={{
-          pathname: '/',
-        }}
-      />
-    );
-  }
+  // if (!activeUserClearance) {
+  //   return (
+  //     <Redirect
+  //       to={{
+  //         pathname: '/',
+  //       }}
+  //     />
+  //   );
+  // }
 
   return !activeGroupId ? (
     <Error />

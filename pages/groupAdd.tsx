@@ -6,6 +6,8 @@ import { useMutation } from 'react-query';
 import axios from 'axios';
 import router from 'next/router';
 import Loading from '../components/Loading';
+import { Container } from '@material-ui/core';
+import UserError from '../components/UserError';
 
 interface Props {
   groups: Group[];
@@ -40,17 +42,15 @@ const GroupAdd = ({ groups }: Props) => {
   // }
 
   if (!mutation.isIdle) {
-    return <Loading />;
+    return <Loading isOpen />;
   }
 
   return (
-    <div>
+    <Container>
       <GroupForm onSave={handleAddGroup} />
 
-      {mutation.isError && (
-        <div id="error">There&apos;s been an error. Please try again.</div>
-      )}
-    </div>
+      {mutation.isError && <UserError />}
+    </Container>
   );
 };
 

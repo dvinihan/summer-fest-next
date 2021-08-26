@@ -1,41 +1,22 @@
 import React from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import styled from 'styled-components';
 import { getActiveUserClearance } from '../helpers';
 import getCsvFile from '../helpers/getCsvFile';
 import Camper from '../models/Camper';
 import Group from '../models/Group';
 import User from '../models/User';
-
-const AdminContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const AdminLink = styled(Link)`
-  color: rgb(35, 61, 211);
-`;
-const AdminTable = styled.table`
-  border: 2px solid black;
-  margin-bottom: 10px;
-`;
-const TableHeaderRow = styled.tr`
-  background-color: rgb(179, 173, 173);
-`;
-const TableRow = styled.tr`
-  background-color: rgb(226, 236, 132);
-`;
-const TableHeader = styled.th`
-  padding: 8px;
-  font-size: 18px;
-`;
-const TableData = styled.td`
-  padding: 8px;
-  font-size: 18px;
-`;
-const CenteredH4 = styled.h4`
-  text-align: center;
-`;
+import {
+  Button,
+  Grid,
+  Link,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@material-ui/core';
 
 interface Props {
   campers: Camper[];
@@ -71,47 +52,64 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
   // }
 
   return (
-    <AdminContainer>
-      <AdminTable>
-        <tbody>
-          <TableHeaderRow>
-            <TableHeader />
-            <TableHeader>Group Name</TableHeader>
-            <TableHeader>Leader</TableHeader>
-          </TableHeaderRow>
-
-          {groups.map((group) =>
-            group.id === 1 ? null : (
-              <TableRow key={group.id}>
-                <TableData>
-                  <AdminLink href={`/groupEdit?id=${group.id}`}>Edit</AdminLink>
-                </TableData>
-                <TableData>{group.group_name}</TableData>
-                <TableData>{group.leader_name}</TableData>
+    <Grid
+      container
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Grid item>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>Group Name</TableCell>
+                <TableCell>Leader</TableCell>
               </TableRow>
-            )
-          )}
-        </tbody>
-      </AdminTable>
+            </TableHead>
 
-      <CenteredH4>
-        <AdminLink href="/groupAdd">Add a Group</AdminLink>
-      </CenteredH4>
+            <TableBody>
+              {groups.map((group) =>
+                group.id === 1 ? null : (
+                  <TableRow key={group.id}>
+                    <TableCell>
+                      <Link href={`/groupEdit?id=${group.id}`}>Edit</Link>
+                    </TableCell>
+                    <TableCell>{group.group_name}</TableCell>
+                    <TableCell>{group.leader_name}</TableCell>
+                  </TableRow>
+                )
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Grid>
 
-      <CenteredH4>
-        <AdminLink href="/userAdd">Add a User</AdminLink>
-      </CenteredH4>
-
-      <CenteredH4>
-        <AdminLink href="/users">View All Users</AdminLink>
-      </CenteredH4>
-
-      <CenteredH4>
-        <button onClick={handleDownloadClick} type="button">
-          Download All Data
-        </button>
-      </CenteredH4>
-    </AdminContainer>
+      <Grid item>
+        <Grid
+          container
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Grid item>
+            <Link href="/groupAdd">Add a Group</Link>
+          </Grid>
+          <Grid item>
+            <Link href="/userAdd">Add a User</Link>
+          </Grid>
+          <Grid item>
+            <Link href="/users">View All Users</Link>
+          </Grid>
+          <Grid item>
+            <Button onClick={handleDownloadClick} type="button">
+              Download All Data
+            </Button>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 };
 
