@@ -12,7 +12,6 @@ const CamperAdd = () => {
   const groupId = router.query.groupId;
 
   const mutation = useMutation((camper: Camper) => {
-    console.log(camper);
     return axios.post('/api/addCamper', camper);
   });
 

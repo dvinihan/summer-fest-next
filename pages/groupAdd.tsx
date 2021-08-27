@@ -5,7 +5,7 @@ import router from 'next/router';
 import Loading from '../components/Loading';
 import { Container } from '@material-ui/core';
 import UserError from '../components/UserError';
-import { useAddGroup } from '../queries/group';
+import { useAddGroup } from '../queries/groups';
 
 const GroupAdd = () => {
   const addGroupMutation = useAddGroup();
@@ -35,9 +35,9 @@ const GroupAdd = () => {
 };
 
 export const getServerSideProps = async () => {
-  const { BASE_URL } = process.env;
+  const { NEXT_PUBLIC_BASE_URL } = process.env;
 
-  const res = await fetch(`${BASE_URL}/api/groups`);
+  const res = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/groups`);
   const json = await res.json();
 
   return {

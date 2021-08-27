@@ -69,10 +69,12 @@ const CamperEdit = ({ camper }: Props) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const { BASE_URL } = process.env;
+  const { NEXT_PUBLIC_BASE_URL } = process.env;
   const camperId = context.query.id;
 
-  const camperRes = await fetch(`${BASE_URL}/api/campers?camperId=${camperId}`);
+  const camperRes = await fetch(
+    `${NEXT_PUBLIC_BASE_URL}/api/campers?camperId=${camperId}`
+  );
   const camperJson = await camperRes.json();
 
   return {

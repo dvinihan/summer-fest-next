@@ -1,5 +1,5 @@
 import { Button, Grid, Modal, Paper, TextField } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getActiveUserClearance } from '../helpers';
 import Group from '../models/Group';
 import User from '../models/User';
@@ -19,6 +19,12 @@ export const GroupForm = ({
 }: Props) => {
   const [group, setGroup] = useState(initialGroup ?? new Group());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // to handle data hydration from react-query
+  useEffect(() => {
+    console.log(initialGroup);
+    setGroup(initialGroup);
+  }, [initialGroup]);
 
   const activeUserClearance = getActiveUserClearance();
 

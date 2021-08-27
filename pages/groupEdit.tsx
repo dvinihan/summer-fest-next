@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
-import Group from '../models/Group';
 import Camper from '../models/Camper';
 import User from '../models/User';
 import GroupForm from '../components/GroupForm';
@@ -20,22 +19,39 @@ import {
 import UserError from '../components/UserError';
 import { NextPageContext } from 'next';
 import getQueryParamId from '../helpers/getQueryParamId';
-import { useDownloadCovidImage } from '../queries/image';
-import { useEditGroup, useDeleteGroup } from '../queries/group';
+import { useDownloadCovidImage } from '../queries/images';
+import {
+  useEditGroup,
+  useDeleteGroup,
+  fetchGroupsById,
+} from '../queries/groups';
 import handleDownload from '../helpers/downloadCSV';
 import downloadImage from '../helpers/downloadImage';
 import Loading from '../components/Loading';
+import { QueryClient, useQuery } from 'react-query';
+import { dehydrate } from 'react-query/hydration';
+import { fetchCampersInGroup } from '../queries/campers';
+import { fetchGroupUsers } from '../queries/users';
 
 interface Props {
-  group: Group;
   campers: Camper[];
   groupUser?: User;
 }
 
-const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
-  const activeUserClearance = getActiveUserClearance();
-
+const GroupEdit = ({}: Props) => {
   const router = useRouter();
+
+  const groupId = getQueryParamId(router.query.id);
+  const groupsQuery = useQuery('groups', () => fetchGroupsById(groupId));
+  const group = groupsQuery.data[0];
+
+  const campersQuery = useQuery('campersInGroup', () =>
+    fetchCampersInGroup(groupId)
+  );
+  const usersQuery = useQuery('groupUsers', () => fetchGroupUsers(groupId));
+  const groupUser = usersQuery.data[0];
+
+  const activeUserClearance = getActiveUserClearance();
 
   const editGroupMutation = useEditGroup();
   const deleteGroupMutation = useDeleteGroup();
@@ -82,7 +98,7 @@ const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
       >
         <Grid item>
           <GroupForm
-            initialGroup={initialGroup}
+            initialGroup={group}
             onDeleteGroup={deleteGroupMutation.mutate}
             onSave={editGroupMutation.mutate}
             groupUser={groupUser}
@@ -97,9 +113,7 @@ const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
           <h2>Campers</h2>
         </Grid>
         <Grid item>
-          <Link href={`/camperAdd?groupId=${initialGroup.id}`}>
-            Add a Camper
-          </Link>
+          <Link href={`/camperAdd?groupId=${group.id}`}>Add a Camper</Link>
         </Grid>
       </Grid>
 
@@ -133,7 +147,7 @@ const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {campers.map((camper) => (
+            {campersQuery.data.map((camper) => (
               <TableRow key={camper.id}>
                 <TableCell>
                   <Link href={`/camperEdit?id=${camper.id}`}>Edit</Link>
@@ -179,7 +193,9 @@ const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
 
       <Grid container justifyContent="center" alignItems="center">
         <Grid item>
-          <Button onClick={() => handleDownload({ campers })}>
+          <Button
+            onClick={() => handleDownload({ campers: campersQuery.data })}
+          >
             Click here to download an Excel file with all your campers
           </Button>
         </Grid>
@@ -189,27 +205,22 @@ const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
 };
 
 export const getServerSideProps = async (context: NextPageContext) => {
-  const { BASE_URL } = process.env;
+  const queryClient = new QueryClient();
+
   const groupId = getQueryParamId(context.query.id);
 
   if (groupId) {
-    const groupsRes = await fetch(`${BASE_URL}/api/groups?id=${groupId}`);
-    const groupsJson = await groupsRes.json();
-    const group = groupsJson[0];
-
-    const campersRes = await fetch(
-      `${BASE_URL}/api/campers?groupId=${groupId}`
+    await queryClient.prefetchQuery('groups', () => fetchGroupsById(groupId));
+    await queryClient.prefetchQuery('campersInGroup', () =>
+      fetchCampersInGroup(groupId)
     );
-    const campersJson = await campersRes.json();
-
-    const usersRes = await fetch(`${BASE_URL}/api/users?groupId=${groupId}`);
-    const usersJson = await usersRes.json();
+    await queryClient.prefetchQuery('groupUsers', () =>
+      fetchGroupUsers(groupId)
+    );
 
     return {
       props: {
-        group,
-        campers: campersJson,
-        groupUser: usersJson,
+        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
       },
     };
   }

@@ -101,9 +101,9 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
 };
 
 export async function getStaticProps() {
-  const { BASE_URL } = process.env;
+  const { NEXT_PUBLIC_BASE_URL } = process.env;
 
-  const res = await fetch(`${BASE_URL}/api/allData`);
+  const res = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/allData`);
   const json = await res.json();
 
   return {
