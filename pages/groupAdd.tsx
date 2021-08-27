@@ -48,7 +48,6 @@ const GroupAdd = ({ groups }: Props) => {
   return (
     <Container>
       <GroupForm onSave={handleAddGroup} />
-
       {mutation.isError && <UserError />}
     </Container>
   );

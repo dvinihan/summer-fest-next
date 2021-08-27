@@ -1,7 +1,8 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACESS_KEY_ID,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,

@@ -1,104 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import Error from './Error';
-import { Redirect } from 'react-router-dom';
-import {
-  deleteCamper,
-  downloadCovidImage,
-  editCamper,
-} from '../services/camper-service';
-import {
-  getActiveUserClearance,
-  getActiveGroupId,
-  getActiveCamperId,
-} from '../helpers';
-import './CamperForm.css';
+import { useEffect, useState } from 'react';
+import { getActiveUserClearance } from '../helpers';
+import Camper from '../models/Camper';
 import ImageViewer from 'react-simple-image-viewer';
-import Camper from './models/Camper';
+import axios from 'axios';
 
-const CamperEdit = () => {
+interface Props {
+  initialCamper: Camper;
+  onDeleteCamper: (camperId: number) => void;
+  onSave: (camper: Camper) => void;
+}
+
+const CamperForm = ({
+  initialCamper = new Camper(),
+  onDeleteCamper,
+  onSave,
+}) => {
+  const [camper, setCamper] = useState(initialCamper);
+  const [newCovidImage, setNewCovidImage] = useState();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFileTypeError, setShowFileTypeError] = useState(false);
   const [isViewerOpenCurrentPic, setIsViewerOpenCurrentPic] = useState(false);
   const [isViewerOpenNewPic, setIsViewerOpenNewPic] = useState(false);
-  const [camper, setCamper] = useState(new Camper());
-  const [campers, setCampers] = useState([]);
-  const [currentCovidImage, setCurrentCovidImage] = useState();
-  const [newCovidImage, setNewCovidImage] = useState();
-  const [groups, setGroups] = useState();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [error, setError] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [currentCovidImage, setCurrentCovidImage] = useState('');
 
   useEffect(() => {
-    fetch('/allData')
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error();
-      })
-      .then((data) => {
-        const camperData = data.campers.find(
-          (c) => String(c.id) === getActiveCamperId()
-        );
+    if (initialCamper.covid_image_file_name) {
+      axios
+        .post('/api/downloadCovidImage', initialCamper.covid_image_file_name)
+        .then((res) => {
+          const image = `data:image/jpeg;base64,${res.data.encodedImage}`;
+          setCurrentCovidImage(image);
+        });
+    } else {
+    }
+  }, []);
 
-        if (camperData.covid_image_file_name) {
-          downloadCovidImage(camperData.covid_image_file_name).then((res) => {
-            const image = `data:image/jpeg;base64,${res.encodedImage}`;
-            setGroups(data.groups);
-            setCamper(camperData);
-            setCurrentCovidImage(image);
-          });
-        } else {
-          setGroups(data.groups);
-          setCamper(camperData);
-        }
-      })
-      .catch(() => null);
-  });
-
-  const handleDeleteCamper = (id, groupId) => {
-    deleteCamper(id, groupId).then((response) => {
-      if (response.error) {
-        setError(true);
-      } else {
-        setShouldRedirect(response.shouldRedirect);
-      }
-    });
-  };
-
-  const handleEditCamper = () => {
-    editCamper(
-      camper.id,
-      camper.first_name,
-      camper.last_name,
-      camper.gender,
-      camper.birthday,
-      camper.grade_completed,
-      camper.allergies,
-      camper.parent_email,
-      camper.emergency_name,
-      camper.emergency_number,
-      camper.roommate,
-      camper.notes,
-      camper.registration,
-      camper.signed_status,
-      camper.signed_by,
-      camper.room,
-      camper.adult_leader,
-      camper.student_leadership_track,
-      camper.camp_attending,
-      camper.covid_image_type,
-      camper.new_covid_image,
-      camper.covid_image_file_name
-    ).then((response) => {
-      if (response.error) {
-        setError(true);
-      } else if (groups) {
-        setShouldRedirect(response.shouldRedirect);
-        setCampers(response.campers);
-      }
-    });
-  };
+  const activeUserClearance = getActiveUserClearance();
 
   const handleChange = (e) => {
     setCamper({ ...camper, [e.target.name]: e.target.value });
@@ -113,45 +50,13 @@ const CamperEdit = () => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
+      // @ts-ignore
       setNewCovidImage(reader.result);
     };
     reader.readAsDataURL(e.target.files[0]);
   };
 
-  if (!groups || !campers) {
-    return null;
-  }
-
-  const activeUserClearance = getActiveUserClearance();
-  const groupId = getActiveGroupId();
-  const camperId = getActiveCamperId();
-
-  const group = groups.find((g) => String(g.id) === groupId);
-  const currentCamper = campers.find((c) => String(c.id) === camperId);
-
-  if (shouldRedirect) {
-    return (
-      <Redirect
-        to={{
-          pathname: '/groupEdit',
-        }}
-      />
-    );
-  }
-
-  if (!activeUserClearance) {
-    return (
-      <Redirect
-        to={{
-          pathname: '/',
-        }}
-      />
-    );
-  }
-
-  return !group || !currentCamper ? (
-    <Error />
-  ) : (
+  return (
     <>
       <div className="camper-form">
         <h3>First Name:</h3>
@@ -328,6 +233,7 @@ const CamperEdit = () => {
           <option value="High School Camp">High School Camp</option>
         </select>
         <br />
+
         <h3>COVID Image Type</h3>
         <select
           onChange={handleChange}
@@ -403,20 +309,14 @@ const CamperEdit = () => {
             <button
               className="no-yes-button"
               type="button"
-              onClick={() => {
-                handleDeleteCamper(camper.id, camper.group_id);
-              }}
+              onClick={onDeleteCamper}
             >
               Yes
             </button>
           </div>
         )}
 
-        <button
-          className="save-camper-button"
-          type="button"
-          onClick={() => handleEditCamper()}
-        >
+        <button className="save-camper-button" type="button" onClick={onSave}>
           Save
         </button>
 
@@ -430,13 +330,9 @@ const CamperEdit = () => {
         >
           Delete
         </button>
-
-        {error && (
-          <div id="error">There&apos;s been an error. Please try again.</div>
-        )}
       </div>
     </>
   );
 };
 
-export default CamperEdit;
+export default CamperForm;

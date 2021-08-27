@@ -1,13 +1,16 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../util/mongodb';
 
-export default async (req, res) => {
-  const { db } = await connectToDatabase();
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const { client, db } = await connectToDatabase();
 
-  db.collection('groups').deleteOne(req.query.id, {}, (err, res) => {
-    if (err) throw err;
+  try {
+    await db.collection('groups').deleteOne({ id: req.query.id });
     console.log('1 document deleted');
-    // db.close();
-  });
+  } catch (error) {
+    throw error;
+  }
 
+  await client.close();
   res.json({});
 };
