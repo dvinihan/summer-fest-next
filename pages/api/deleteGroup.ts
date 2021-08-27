@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import connectToDatabase from '../../util/mongodb';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const { client, db } = await connectToDatabase();
+  const db = await connectToDatabase();
 
   try {
     await db.collection('groups').deleteOne({ id: req.query.id });
@@ -11,6 +11,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     throw error;
   }
 
-  await client.close();
   res.json({});
 };

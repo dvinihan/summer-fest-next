@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import fs from 'fs';
 
-const uploadToS3 = (fileContent: string, fileName: string) => {
+const uploadToS3 = async (fileContent: string, fileName: string) => {
   const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACESS_KEY_ID,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,

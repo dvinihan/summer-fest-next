@@ -1,7 +1,4 @@
-import React, { useEffect, useState } from 'react';
-// import { addCamper } from '../services/camper-service';
-import ImageViewer from 'react-simple-image-viewer';
-import { getActiveUserClearance } from '../helpers';
+import React, { useEffect } from 'react';
 import Camper from '../models/Camper';
 import { useRouter } from 'next/router';
 import { useMutation } from 'react-query';
@@ -14,45 +11,18 @@ const CamperAdd = () => {
   const router = useRouter();
   const groupId = router.query.groupId;
 
-  const [showFileTypeError, setShowFileTypeError] = useState(false);
-  const [camper, setCamper] = useState(
-    new Camper({ signed_status: 'Not Sent' })
-  );
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const mutation = useMutation((camper: Camper) => {
+    console.log(camper);
+    return axios.post('/api/addCamper', camper);
+  });
 
-  const mutation = useMutation(() =>
-    axios.post('/api/addCamper', { groupId, camper })
-  );
+  const handleSave = (camper: Camper) => mutation.mutate(camper);
 
   useEffect(() => {
     if (mutation.isSuccess) {
       router.push(`/groupEdit?id=${groupId}`);
     }
   });
-
-  const handleImageUpload = (e) => {
-    if (e.target.files[0].type !== 'image/jpeg') {
-      setShowFileTypeError(true);
-      return;
-    }
-
-    setShowFileTypeError(false);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setCamper(
-        (currentCamper) =>
-          new Camper({ ...currentCamper, covid_image: reader.result })
-      );
-    };
-    reader.readAsDataURL(e.target.files[0]);
-  };
-
-  const activeUserClearance = getActiveUserClearance();
-
-  const handleAddCamper = async () => {
-    mutation.mutate();
-  };
 
   if (!mutation.isIdle) {
     return <Loading isOpen />;
@@ -62,7 +32,12 @@ const CamperAdd = () => {
     <PageError />
   ) : (
     <>
-      <CamperForm />
+      <CamperForm
+        initialCamper={
+          new Camper({ group_id: groupId, signed_status: 'Not Sent' })
+        }
+        onSave={handleSave}
+      />
       {mutation.isError && <div>There&apos;s been an error</div>}
     </>
   );

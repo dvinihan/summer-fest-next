@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { makeAdmin, userDelete } from '../services/user-service';
+// import { makeAdmin, userDelete } from '../services/user-service';
 import { getActiveUserClearance, getActiveUserName } from '../helpers';
 
 const Users = () => {
@@ -23,29 +23,29 @@ const Users = () => {
   });
 
   const handleMakeAdmin = (userId) => {
-    makeAdmin(userId).then((response) => {
-      if (response.error) {
-        setError(true);
-      } else {
-        setData({
-          ...data,
-          users: response.users,
-        });
-      }
-    });
+    // makeAdmin(userId).then((response) => {
+    //   if (response.error) {
+    //     setError(true);
+    //   } else {
+    //     setData({
+    //       ...data,
+    //       users: response.users,
+    //     });
+    //   }
+    // });
   };
 
   const deleteUser = (userId) => {
-    userDelete(userId).then((response) => {
-      if (response.error) {
-        setError(true);
-      } else {
-        setData({
-          ...data,
-          users: response.users,
-        });
-      }
-    });
+    // userDelete(userId).then((response) => {
+    //   if (response.error) {
+    //     setError(true);
+    //   } else {
+    //     setData({
+    //       ...data,
+    //       users: response.users,
+    //     });
+    //   }
+    // });
   };
 
   const getGroupName = (groups, user) => {

@@ -3,19 +3,27 @@ import { getActiveUserClearance } from '../helpers';
 import Camper from '../models/Camper';
 import ImageViewer from 'react-simple-image-viewer';
 import axios from 'axios';
+import {
+  Button,
+  Container,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Paper,
+  Select,
+  TextareaAutosize,
+  TextField,
+} from '@material-ui/core';
 
 interface Props {
-  initialCamper: Camper;
-  onDeleteCamper: (camperId: number) => void;
+  initialCamper?: Camper;
   onSave: (camper: Camper) => void;
+  onDeleteCamper?: (camperId: number) => void;
 }
 
-const CamperForm = ({
-  initialCamper = new Camper(),
-  onDeleteCamper,
-  onSave,
-}) => {
-  const [camper, setCamper] = useState(initialCamper);
+const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
+  const [camper, setCamper] = useState(initialCamper ?? new Camper());
   const [newCovidImage, setNewCovidImage] = useState();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFileTypeError, setShowFileTypeError] = useState(false);
@@ -31,7 +39,6 @@ const CamperForm = ({
           const image = `data:image/jpeg;base64,${res.data.encodedImage}`;
           setCurrentCovidImage(image);
         });
-    } else {
     }
   }, []);
 
@@ -57,281 +64,276 @@ const CamperForm = ({
   };
 
   return (
-    <>
-      <div className="camper-form">
-        <h3>First Name:</h3>
-        <input
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.first_name}
-          name="first_name"
-        />
-        <br />
-        <h3>Last Name:</h3>
-        <input
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.last_name}
-          name="last_name"
-        />
-        <br />
-        <h3>Gender:</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.gender}
-          name="gender"
-        >
-          <option value="null">{null}</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <br />
-        <h3>Birthday:</h3>
-        <input
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.birthday}
-          name="birthday"
-        />
-        <br />
-        <h3>Grade just completed:</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.grade_completed}
-          name="grade_completed"
-        >
-          <option value="null">{null}</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-        </select>
-        <br />
-        <h3>Food Allergies:</h3>
-        <input
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.allergies}
-          name="allergies"
-        />
-        <br />
-        <h3>Parent or Guardian Email:</h3>
-        <input
-          type="email"
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.parent_email}
-          name="parent_email"
-        />
-        <br />
-        <h3>Emergency Contact Name:</h3>
-        <input
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.emergency_name}
-          name="emergency_name"
-        />
-        <br />
-        <h3>Emergency Contact Number:</h3>
-        <input
-          type="tel"
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.emergency_number}
-          name="emergency_number"
-        />
-        <br />
-        <h3>Roommate:</h3>
-        <input
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.roommate}
-          name="roommate"
-        />
-        <br />
-        <h3>Notes:</h3>
-        <textarea
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.notes}
-          name="notes"
-        />
-        <br />
-        <h3>Online or Paper Registration:</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.registration}
-          name="registration"
-        >
-          <option value="null">{null}</option>
-          <option value="Online">Online</option>
-          <option value="Paper">Paper</option>
-        </select>
-        <br />
-        <h3>Waiver Signed Status:</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.signed_status}
-          name="signed_status"
-        >
-          <option value="null">{null}</option>
-          <option value="Not Sent">Not Sent</option>
-          <option value="Emailed">Emailed</option>
-          <option value="Signed">Signed</option>
-        </select>
-        <br />
-        {activeUserClearance === 'admin' && (
-          <>
-            <h3>Room Assignment:</h3>
-            <input
+    <Container maxWidth="xl">
+      <Paper>
+        <Grid container spacing={4}>
+          <Grid item>
+            <TextField
+              label="First Name"
               onChange={handleChange}
-              className="camper-input"
-              defaultValue={camper.room}
-              name="room"
+              value={camper.first_name}
+              name="first_name"
             />
-            <br />
-          </>
-        )}
-        <h3>Is this person an adult leader?</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.adult_leader}
-          name="adult_leader"
-        >
-          <option value="null">{null}</option>
-          <option value="Yes">Yes</option>
-        </select>
-        <br />
-        <h3>Student Leadership Track?</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          defaultValue={camper.student_leadership_track}
-          name="student_leadership_track"
-        >
-          <option value="null">{null}</option>
-          <option value="Yes">Yes</option>
-        </select>
-        <h3>Camp Attending</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          name="camp_attending"
-          defaultValue={camper.camp_attending}
-        >
-          <option value="null">{null}</option>
-          <option value="Middle School Camp">Middle School Camp</option>
-          <option value="High School Camp">High School Camp</option>
-        </select>
-        <br />
-
-        <h3>COVID Image Type</h3>
-        <select
-          onChange={handleChange}
-          className="camper-input"
-          name="covid_image_type"
-        >
-          <option value="null">{null}</option>
-          <option value="Negative Test">Negative Test</option>
-          <option value="Proof of Vaccine">Proof of Vaccine</option>
-        </select>
-        <br />
-        <h3>COVID Image</h3>
-        <p>Current file: {camper.covid_image_file_name}</p>
-        <button type="button" onClick={() => setIsViewerOpenCurrentPic(true)}>
-          <img
-            alt="Current Covid document"
-            src={currentCovidImage}
-            width="300px"
-          />
-        </button>
-        {isViewerOpenCurrentPic && (
-          <ImageViewer
-            src={[currentCovidImage]}
-            currentIndex={0}
-            onClose={() => setIsViewerOpenCurrentPic(false)}
-            backgroundStyle={{
-              backgroundColor: 'rgba(0,0,0,0.9)',
-            }}
-          />
-        )}
-
-        <input
-          style={{ marginTop: '15px' }}
-          onChange={handleImageUpload}
-          type="file"
-          id="covid_file"
-          name="covid_file"
-          accept="image/jpeg"
-        />
-        {showFileTypeError && (
-          <p className="camper-input-error">
-            Only JPG image files are supported
-          </p>
-        )}
-
-        <button type="button" onClick={() => setIsViewerOpenNewPic(true)}>
-          <img alt="New covid document" src={newCovidImage} width="300px" />
-        </button>
-        {isViewerOpenNewPic && (
-          <ImageViewer
-            src={[newCovidImage]}
-            currentIndex={0}
-            onClose={() => setIsViewerOpenNewPic(false)}
-            backgroundStyle={{
-              backgroundColor: 'rgba(0,0,0,0.9)',
-            }}
-          />
-        )}
-
-        {showDeleteModal && (
-          <div id="delete-camper-modal">
-            <h1>
-              Are you sure you want to PERMANENTLY delete {camper.first_name}{' '}
-              {camper.last_name}?
-            </h1>
-            <button
-              className="no-yes-button"
-              type="button"
-              onClick={() => setShowDeleteModal(false)}
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Last Name"
+              onChange={handleChange}
+              value={camper.last_name}
+              name="last_name"
+            />
+          </Grid>
+          <Grid item>
+            <InputLabel>Gender</InputLabel>
+            <Select
+              label="Gender"
+              onChange={handleChange}
+              value={camper.gender}
+              name="gender"
             >
-              No
-            </button>
-            <button
-              className="no-yes-button"
-              type="button"
-              onClick={onDeleteCamper}
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Male">Male</MenuItem>
+              <MenuItem value="Female">Female</MenuItem>
+              <MenuItem value="Other">Other</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Birthday"
+              onChange={handleChange}
+              value={camper.birthday}
+              name="birthday"
+            />
+          </Grid>
+          <Grid item>
+            <InputLabel>Grade just completed</InputLabel>
+            <Select
+              onChange={handleChange}
+              value={camper.grade_completed}
+              name="grade_completed"
             >
-              Yes
-            </button>
-          </div>
-        )}
-
-        <button className="save-camper-button" type="button" onClick={onSave}>
-          Save
-        </button>
-
-        <br />
-        <br />
-
-        <button
-          className="delete-camper-button"
-          type="button"
-          onClick={() => setShowDeleteModal(true)}
-        >
-          Delete
-        </button>
-      </div>
-    </>
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="7">7</MenuItem>
+              <MenuItem value="8">8</MenuItem>
+              <MenuItem value="9">9</MenuItem>
+              <MenuItem value="10">10</MenuItem>
+              <MenuItem value="11">11</MenuItem>
+              <MenuItem value="12">12</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Food Allergies"
+              onChange={handleChange}
+              value={camper.allergies}
+              name="allergies"
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Parent or Guardian Email"
+              type="email"
+              onChange={handleChange}
+              value={camper.parent_email}
+              name="parent_email"
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Emergency Contact Name"
+              onChange={handleChange}
+              value={camper.emergency_name}
+              name="emergency_name"
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Emergency Contact Number"
+              type="tel"
+              onChange={handleChange}
+              value={camper.emergency_number}
+              name="emergency_number"
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Roommate"
+              onChange={handleChange}
+              value={camper.roommate}
+              name="roommate"
+            />
+          </Grid>
+          <Grid item>
+            <InputLabel>Notes</InputLabel>
+            <TextareaAutosize
+              onChange={handleChange}
+              value={camper.notes}
+              name="notes"
+            />
+          </Grid>
+          <Grid item>
+            <InputLabel>Registration</InputLabel>
+            <Select
+              onChange={handleChange}
+              value={camper.registration}
+              name="registration"
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Online">Online</MenuItem>
+              <MenuItem value="Paper">Paper</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <InputLabel>Waiver</InputLabel>
+            <Select
+              onChange={handleChange}
+              value={camper.signed_status}
+              name="signed_status"
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Not Sent">Not Sent</MenuItem>
+              <MenuItem value="Emailed">Emailed</MenuItem>
+              <MenuItem value="Signed">Signed</MenuItem>
+            </Select>
+          </Grid>
+          {activeUserClearance === 'admin' && (
+            <Grid item>
+              <TextField
+                label="Room Assignment"
+                onChange={handleChange}
+                value={camper.room}
+                name="room"
+              />
+            </Grid>
+          )}
+          <Grid item>
+            <InputLabel>Is this person an adult leader?</InputLabel>
+            <Select
+              onChange={handleChange}
+              value={camper.adult_leader}
+              name="adult_leader"
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Yes">Yes</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <InputLabel>Student Leadership track?</InputLabel>
+            <Select
+              onChange={handleChange}
+              value={camper.student_leadership_track}
+              name="student_leadership_track"
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Yes">Yes</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <InputLabel>Camp Attending</InputLabel>
+            <Select
+              onChange={handleChange}
+              name="camp_attending"
+              value={camper.camp_attending}
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Middle School Camp">Middle School Camp</MenuItem>
+              <MenuItem value="High School Camp">High School Camp</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <InputLabel>COVID Image Type</InputLabel>
+            <Select
+              onChange={handleChange}
+              name="covid_image_type"
+              value={camper.covid_image_type}
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="Negative Test">Negative Test</MenuItem>
+              <MenuItem value="Proof of Vaccine">Proof of Vaccine</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <h3>COVID Image</h3>
+            <p>Current file: {camper.covid_image_file_name}</p>
+            <Button onClick={() => setIsViewerOpenCurrentPic(true)}>
+              <img
+                alt="Current Covid document"
+                src={currentCovidImage}
+                width="300px"
+              />
+            </Button>
+          </Grid>
+          {isViewerOpenCurrentPic && (
+            <Grid item>
+              <ImageViewer
+                src={[currentCovidImage]}
+                currentIndex={0}
+                onClose={() => setIsViewerOpenCurrentPic(false)}
+                backgroundStyle={{
+                  backgroundColor: 'rgba(0,0,0,0.9)',
+                }}
+              />
+            </Grid>
+          )}
+          <Grid item>
+            <input
+              style={{ marginTop: '15px' }}
+              onChange={handleImageUpload}
+              type="file"
+              name="covid_file"
+              accept="image/jpeg"
+            />
+            {showFileTypeError && (
+              <p className="camper-input-error">
+                Only JPG image files are supported
+              </p>
+            )}
+          </Grid>
+          <Grid item>
+            <Button onClick={() => setIsViewerOpenNewPic(true)}>
+              <img alt="New covid document" src={newCovidImage} width="300px" />
+            </Button>
+          </Grid>
+          {isViewerOpenNewPic && (
+            <Grid item>
+              <ImageViewer
+                src={[newCovidImage]}
+                currentIndex={0}
+                onClose={() => setIsViewerOpenNewPic(false)}
+                backgroundStyle={{
+                  backgroundColor: 'rgba(0,0,0,0.9)',
+                }}
+              />
+            </Grid>
+          )}
+          {showDeleteModal && (
+            <Modal open>
+              <>
+                <h1>
+                  Are you sure you want to PERMANENTLY delete{' '}
+                  {camper.first_name} {camper.last_name}?
+                </h1>
+                <Button onClick={() => setShowDeleteModal(false)}>No</Button>
+                <Button onClick={() => onDeleteCamper(camper.id)}>Yes</Button>
+              </>
+            </Modal>
+          )}
+        </Grid>
+      </Paper>
+      <Paper>
+        <Grid container justifyContent="center" alignItems="center">
+          <Grid item>
+            <Button onClick={() => onSave(camper)}>Save</Button>
+          </Grid>
+          {onDeleteCamper && (
+            <Grid item>
+              <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
+            </Grid>
+          )}
+        </Grid>
+      </Paper>
+    </Container>
   );
 };
 

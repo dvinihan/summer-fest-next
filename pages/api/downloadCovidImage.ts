@@ -20,6 +20,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const image = fs.readFileSync(req.body.covidImageFileName);
     const encodedImage = image.toString('base64');
-    res.status(200).send(JSON.stringify({ encodedImage }));
+    res.status(200).send(JSON.stringify(encodedImage));
   });
 };

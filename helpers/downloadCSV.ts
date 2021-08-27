@@ -42,7 +42,7 @@ const convertArrayOfObjectsToCSV = (data, isAdmin, groups?) => {
   return null;
 };
 
-const getCsvFile = ({
+const downloadCSV = ({
   users,
   groups,
   campers,
@@ -52,9 +52,25 @@ const getCsvFile = ({
   groups?: Group[];
   campers?: Camper[];
   isAdmin?: boolean;
-}) =>
-  convertArrayOfObjectsToCSV(users, isAdmin) +
-  convertArrayOfObjectsToCSV(groups, isAdmin) +
-  convertArrayOfObjectsToCSV(campers, isAdmin, groups);
+}) => {
+  const csvFile =
+    convertArrayOfObjectsToCSV(users, isAdmin) +
+    convertArrayOfObjectsToCSV(groups, isAdmin) +
+    convertArrayOfObjectsToCSV(campers, isAdmin, groups);
 
-export default getCsvFile;
+  const element = document.createElement('a');
+  element.setAttribute(
+    'href',
+    `data:text/plain;charset=utf-8${encodeURIComponent(csvFile)}`
+  );
+  element.setAttribute('download', 'registration-data.csv');
+  element.style.display = 'none';
+  if (typeof element.download !== 'undefined') {
+    // browser has support - process the download
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+};
+
+export default downloadCSV;

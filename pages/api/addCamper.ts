@@ -1,27 +1,31 @@
 import { Db } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
-import uploadToS3 from '../../helpers/uploadToS3';
+import uploadToS3 from '../../util/uploadToS3';
 import Camper from '../../models/Camper';
 import connectToDatabase from '../../util/mongodb';
 
-const transporter = nodemailer.createTransport({
-  host: 'box1014.bluehost.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: 'waivers@summerfestivalcamp.com',
-    pass: 'hDy>T(Zz}hp&sN6',
-  },
-});
+interface AddCamperRequest extends NextApiRequest {
+  body: Camper;
+}
 
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log('Server is ready to take our messages');
-  }
-});
+// const transporter = nodemailer.createTransport({
+//   host: 'box1014.bluehost.com',
+//   port: 465,
+//   secure: true,
+//   auth: {
+//     user: 'waivers@summerfestivalcamp.com',
+//     pass: 'hDy>T(Zz}hp&sN6',
+//   },
+// });
+
+// transporter.verify(function (error, success) {
+//   if (error) {
+//     console.log(error);
+//   } else {
+//     console.log('Server is ready to take our messages');
+//   }
+// });
 
 const checkEmail = async (db: Db, camper: Camper) => {
   if (
@@ -34,17 +38,17 @@ const checkEmail = async (db: Db, camper: Camper) => {
 
   const id = camper.id * 73648;
 
-  try {
-    await transporter.sendMail({
-      from: '"Summer Festival" <waivers@summerfestivalcamp.com>',
-      to: camper.parent_email,
-      subject: 'Your Summer Festival Registration Waiver',
-      text: '',
-      html: `<p>Please sign the Summer Festival Waiver Form, <a href='https://summer-fest-registration.herokuapp.com/waiver?id=${id}'>linked here.</a></p><p>Thank you!</p><p>Tony Ducklow<br />Summer Festival Camp Director</p>`,
-    });
-  } catch (error) {
-    throw error;
-  }
+  // try {
+  //   await transporter.sendMail({
+  //     from: '"Summer Festival" <waivers@summerfestivalcamp.com>',
+  //     to: camper.parent_email,
+  //     subject: 'Your Summer Festival Registration Waiver',
+  //     text: '',
+  //     html: `<p>Please sign the Summer Festival Waiver Form, <a href='https://summer-fest-registration.herokuapp.com/waiver?id=${id}'>linked here.</a></p><p>Thank you!</p><p>Tony Ducklow<br />Summer Festival Camp Director</p>`,
+  //   });
+  // } catch (error) {
+  //   throw error;
+  // }
 
   try {
     await db
@@ -56,8 +60,8 @@ const checkEmail = async (db: Db, camper: Camper) => {
   }
 };
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const { client, db } = await connectToDatabase();
+export default async (req: AddCamperRequest, res: NextApiResponse) => {
+  const db = await connectToDatabase();
 
   let covidFileName = '';
   if (req.body.covid_image) {
@@ -69,20 +73,23 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    await db
+    const { insertedId } = await db
       .collection('campers')
-      .insertOne({ ...req.body, covid_image_file_name: covidFileName });
+      .insertOne(
+        new Camper({ ...req.body, covid_image_file_name: covidFileName })
+      );
+
     console.log('1 document inserted');
+
+    const newCamperDoc = await db
+      .collection('campers')
+      .findOne({ _id: insertedId });
+
+    await checkEmail(db, JSON.parse(JSON.stringify(newCamperDoc)));
   } catch (error) {
+    console.log(error);
     throw error;
   }
 
-  const newCamperDoc = await db
-    .collection('campers')
-    .findOne({ id: req.body.id });
-
-  await checkEmail(db, JSON.parse(JSON.stringify(newCamperDoc)));
-
-  await client.close();
   res.json({});
 };

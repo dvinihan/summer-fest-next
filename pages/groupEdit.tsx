@@ -1,18 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
 import Group from '../models/Group';
 import Camper from '../models/Camper';
 import User from '../models/User';
 import GroupForm from '../components/GroupForm';
-import { useMutation } from 'react-query';
-import axios from 'axios';
-import getCsvFile from '../helpers/getCsvFile';
 import {
   Button,
   Grid,
   Link,
-  Modal,
   Paper,
   Table,
   TableBody,
@@ -21,77 +17,35 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
 import UserError from '../components/UserError';
+import { NextPageContext } from 'next';
+import getQueryParamId from '../helpers/getQueryParamId';
+import { useDownloadCovidImage } from '../queries/image';
+import { useEditGroup, useDeleteGroup } from '../queries/group';
+import handleDownload from '../helpers/downloadCSV';
+import downloadImage from '../helpers/downloadImage';
+import Loading from '../components/Loading';
 
 interface Props {
   group: Group;
-  campersInGroup: Camper[];
+  campers: Camper[];
   groupUser?: User;
 }
 
-const GroupEdit = ({
-  group: initialGroup,
-  campersInGroup = [],
-  groupUser,
-}: Props) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+const GroupEdit = ({ group: initialGroup, campers = [], groupUser }: Props) => {
   const activeUserClearance = getActiveUserClearance();
 
   const router = useRouter();
 
-  const editGroupMutation = useMutation((editedGroup: Group) =>
-    axios.post(`/api/editGroup`, editedGroup)
-  );
-  const deleteGroupMutation = useMutation((groupId: number) =>
-    axios.delete(`/api/deleteGroup?id=${groupId}`)
-  );
-  const downloadCovidImageMutation = useMutation((covidImageFileName) =>
-    axios.post(`/api/downloadCovidImage`, covidImageFileName)
-  );
+  const editGroupMutation = useEditGroup();
+  const deleteGroupMutation = useDeleteGroup();
+  const downloadCovidImageMutation = useDownloadCovidImage();
 
-  const handleEditGroup = (group) => {
-    editGroupMutation.mutate({
-      id: group.id,
-      group_name: group.group_name,
-      leader_name: group.leader_name,
-    });
-  };
-
-  const handleDeleteGroup = (groupId) => {
-    deleteGroupMutation.mutate(groupId);
-  };
-
-  const handleDownloadClick = () => {
-    const element = document.createElement('a');
-    element.setAttribute(
-      'href',
-      `data:text/plain;charset=utf-8${encodeURIComponent(
-        getCsvFile({ campers: campersInGroup })
-      )}`
-    );
-    element.setAttribute('download', 'registration-data.csv');
-    element.style.display = 'none';
-    if (typeof element.download !== 'undefined') {
-      // browser has support - process the download
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }
-  };
-
-  const downloadImage = (covidFileName) => {
+  const handleDownloadCovidImage = (covidFileName: string) => {
     downloadCovidImageMutation.mutate(covidFileName);
 
-    const res = downloadCovidImageMutation.data;
-    const link = document.createElement('a');
-    // @ts-ignore
-    link.href = `data:image/jpeg;base64,${res.encodedImage}`;
-    link.download = covidFileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const axiosResponse = downloadCovidImageMutation.data;
+    downloadImage(covidFileName, axiosResponse.data);
   };
 
   //   if (shouldRedirect) {
@@ -116,6 +70,10 @@ const GroupEdit = ({
 
   return (
     <>
+      {(editGroupMutation.isLoading || deleteGroupMutation.isLoading) && (
+        <Loading isOpen />
+      )}
+
       <Grid
         container
         direction="column"
@@ -123,7 +81,12 @@ const GroupEdit = ({
         alignItems="center"
       >
         <Grid item>
-          <GroupForm initialGroup={initialGroup} onSave={handleEditGroup} />
+          <GroupForm
+            initialGroup={initialGroup}
+            onDeleteGroup={deleteGroupMutation.mutate}
+            onSave={editGroupMutation.mutate}
+            groupUser={groupUser}
+          />
         </Grid>
 
         {(editGroupMutation.isError || deleteGroupMutation.isError) && (
@@ -134,13 +97,10 @@ const GroupEdit = ({
           <h2>Campers</h2>
         </Grid>
         <Grid item>
-          <Link href="/camperAdd">Add a Camper</Link>
+          <Link href={`/camperAdd?groupId=${initialGroup.id}`}>
+            Add a Camper
+          </Link>
         </Grid>
-        {activeUserClearance === 'admin' && (
-          <Grid item>
-            <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
-          </Grid>
-        )}
       </Grid>
 
       <TableContainer component={Paper}>
@@ -173,7 +133,7 @@ const GroupEdit = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {campersInGroup.map((camper) => (
+            {campers.map((camper) => (
               <TableRow key={camper.id}>
                 <TableCell>
                   <Link href={`/camperEdit?id=${camper.id}`}>Edit</Link>
@@ -204,7 +164,7 @@ const GroupEdit = ({
                     <Button
                       style={{ cursor: 'pointer' }}
                       onClick={() =>
-                        downloadImage(camper.covid_image_file_name)
+                        handleDownloadCovidImage(camper.covid_image_file_name)
                       }
                     >
                       Download
@@ -219,53 +179,40 @@ const GroupEdit = ({
 
       <Grid container justifyContent="center" alignItems="center">
         <Grid item>
-          <Button onClick={handleDownloadClick}>
+          <Button onClick={() => handleDownload({ campers })}>
             Click here to download an Excel file with all your campers
           </Button>
         </Grid>
       </Grid>
-
-      {showDeleteModal && (
-        <Modal open>
-          <>
-            <h1>
-              Are you sure you want to PERMANENTLY delete{' '}
-              {initialGroup.group_name} and all its campers
-              {groupUser && (
-                <span>, along with the user {groupUser.username}</span>
-              )}
-              ?
-            </h1>
-            <Button onClick={() => setShowDeleteModal(false)}>No</Button>
-            <Button onClick={handleDeleteGroup}>Yes</Button>
-          </>
-        </Modal>
-      )}
     </>
   );
 };
 
-export const getServerSideProps = async (context) => {
+export const getServerSideProps = async (context: NextPageContext) => {
   const { BASE_URL } = process.env;
-  const groupId = parseInt(context.query.id);
+  const groupId = getQueryParamId(context.query.id);
 
-  const groupRes = await fetch(`${BASE_URL}/api/groups?id=${groupId}`);
-  const groupJson = await groupRes.json();
-  const group = groupJson[0];
+  if (groupId) {
+    const groupsRes = await fetch(`${BASE_URL}/api/groups?id=${groupId}`);
+    const groupsJson = await groupsRes.json();
+    const group = groupsJson[0];
 
-  const campersRes = await fetch(`${BASE_URL}/api/campers?groupId=${groupId}`);
-  const campersJson = await campersRes.json();
+    const campersRes = await fetch(
+      `${BASE_URL}/api/campers?groupId=${groupId}`
+    );
+    const campersJson = await campersRes.json();
 
-  const usersRes = await fetch(`${BASE_URL}/api/users?groupId=${groupId}`);
-  const usersJson = await usersRes.json();
+    const usersRes = await fetch(`${BASE_URL}/api/users?groupId=${groupId}`);
+    const usersJson = await usersRes.json();
 
-  return {
-    props: {
-      group,
-      campersInGroup: campersJson,
-      groupUser: usersJson,
-    },
-  };
+    return {
+      props: {
+        group,
+        campers: campersJson,
+        groupUser: usersJson,
+      },
+    };
+  }
 };
 
 export default GroupEdit;

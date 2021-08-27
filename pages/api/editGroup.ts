@@ -1,17 +1,22 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import Group from '../../models/Group';
 import connectToDatabase from '../../util/mongodb';
 
-export default async (req, res) => {
-  const { db } = await connectToDatabase();
+interface EditGroupRequest extends NextApiRequest {
+  body: Group;
+}
 
-  const updatedGroup = req.body;
+export default async (req: EditGroupRequest, res: NextApiResponse) => {
+  const db = await connectToDatabase();
 
-  var myquery = { id: updatedGroup.id };
-  var newvalues = { $set: updatedGroup };
-  db.collection('groups').updateOne(myquery, newvalues, (err, res) => {
-    if (err) throw err;
+  try {
+    await db
+      .collection('groups')
+      .updateOne({ id: req.body.id }, { $set: new Group(req.body) });
     console.log('1 document updated');
-    // db.close();
-  });
+  } catch (error) {
+    throw error;
+  }
 
   res.json({});
 };

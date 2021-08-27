@@ -1,27 +1,36 @@
-import { Button, Container, Grid, Paper, TextField } from '@material-ui/core';
+import { Button, Grid, Modal, Paper, TextField } from '@material-ui/core';
 import React, { useState } from 'react';
+import { getActiveUserClearance } from '../helpers';
 import Group from '../models/Group';
+import User from '../models/User';
 
 interface Props {
   initialGroup?: Group;
+  onDeleteGroup?: (groupId: number) => void;
   onSave: (group: Group) => void;
+  groupUser?: User;
 }
 
-export const GroupForm = ({ initialGroup, onSave }: Props) => {
+export const GroupForm = ({
+  initialGroup,
+  onDeleteGroup,
+  onSave,
+  groupUser,
+}: Props) => {
   const [group, setGroup] = useState(initialGroup ?? new Group());
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const activeUserClearance = getActiveUserClearance();
 
   const handleChange = (e) => {
     setGroup({ ...group, [e.target.name]: e.target.value });
   };
-
-  const handleSave = () => onSave(group);
 
   return (
     <Paper>
       <Grid container justifyContent="center" alignItems="center">
         <Grid item>
           <TextField
-            id="standard-basic"
             label="Group"
             onChange={handleChange}
             value={group.group_name}
@@ -30,7 +39,6 @@ export const GroupForm = ({ initialGroup, onSave }: Props) => {
         </Grid>
         <Grid item>
           <TextField
-            id="standard-basic"
             label="Leader"
             onChange={handleChange}
             value={group.leader_name}
@@ -41,11 +49,33 @@ export const GroupForm = ({ initialGroup, onSave }: Props) => {
 
       <Grid container justifyContent="center" alignItems="center">
         <Grid item>
-          <Button variant="contained" onClick={handleSave}>
+          <Button variant="contained" onClick={() => onSave(group)}>
             Save
           </Button>
         </Grid>
+        {onDeleteGroup && activeUserClearance === 'admin' && (
+          <Grid item>
+            <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
+          </Grid>
+        )}
       </Grid>
+
+      {showDeleteModal && (
+        <Modal open>
+          <>
+            <h1>
+              Are you sure you want to PERMANENTLY delete{' '}
+              {initialGroup.group_name} and all its campers
+              {groupUser && (
+                <span>, along with the user {groupUser.username}</span>
+              )}
+              ?
+            </h1>
+            <Button onClick={() => setShowDeleteModal(false)}>No</Button>
+            <Button onClick={() => onDeleteGroup(group.id)}>Yes</Button>
+          </>
+        </Modal>
+      )}
     </Paper>
   );
 };

@@ -1,5 +1,4 @@
 import { Db, MongoClient } from 'mongodb';
-import MongoInstance from '../models/MongoInstance';
 
 const { MONGODB_URI, MONGODB_DB } = process.env;
 
@@ -27,16 +26,15 @@ if (!cached) {
   cached = global.mongo = { conn: null, promise: null };
 }
 
-const connectToDatabase: () => Promise<MongoInstance> = async () => {
+const connectToDatabase: () => Promise<Db> = async () => {
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    cached.promise = MongoClient.connect(MONGODB_URI).then((client) => ({
-      client,
-      db: client.db(MONGODB_DB),
-    }));
+    cached.promise = MongoClient.connect(MONGODB_URI).then((client) =>
+      client.db(MONGODB_DB)
+    );
   }
   cached.conn = await cached.promise;
   return cached.conn;

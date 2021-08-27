@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
-import getCsvFile from '../helpers/getCsvFile';
 import Camper from '../models/Camper';
 import Group from '../models/Group';
 import User from '../models/User';
@@ -17,6 +16,7 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
+import handleDownload from '../helpers/downloadCSV';
 
 interface Props {
   campers: Camper[];
@@ -26,24 +26,6 @@ interface Props {
 
 const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
   const router = useRouter();
-
-  const handleDownloadClick = () => {
-    const element = document.createElement('a');
-    element.setAttribute(
-      'href',
-      `data:text/plain;charset=utf-8,${encodeURIComponent(
-        getCsvFile({ groups, campers, users, isAdmin: true })
-      )}`
-    );
-    element.setAttribute('download', 'registration-data.csv');
-    element.style.display = 'none';
-    if (typeof element.download !== 'undefined') {
-      // browser has support - process the download
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }
-  };
 
   // const activeUserClearance = getActiveUserClearance();
   // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
@@ -103,7 +85,12 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
             <Link href="/users">View All Users</Link>
           </Grid>
           <Grid item>
-            <Button onClick={handleDownloadClick} type="button">
+            <Button
+              onClick={() =>
+                handleDownload({ groups, campers, users, isAdmin: true })
+              }
+              type="button"
+            >
               Download All Data
             </Button>
           </Grid>

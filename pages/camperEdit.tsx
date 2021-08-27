@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useMutation } from 'react-query';
 import CamperForm from '../components/CamperForm';
 import Loading from '../components/Loading';
@@ -8,8 +8,8 @@ import PageError from '../components/PageError';
 import Camper from '../models/Camper';
 
 interface Props {
-  groupId: number;
-  camper: Camper;
+  groupId: string;
+  camper?: Camper;
 }
 
 const CamperEdit = ({ camper }: Props) => {
@@ -27,14 +27,6 @@ const CamperEdit = ({ camper }: Props) => {
       router.push(`/groupEdit?id=${camper.group_id}`);
     }
   });
-
-  const handleEditCamper = () => {
-    editCamperMutation.mutate();
-  };
-
-  const handleDeleteCamper = () => {
-    deleteCamperMutation.mutate();
-  };
 
   if (!editCamperMutation.isIdle && !deleteCamperMutation.isIdle) {
     return <Loading isOpen />;
@@ -60,16 +52,14 @@ const CamperEdit = ({ camper }: Props) => {
   //     );
   //   }
 
-  // return;
-  // !currentCamper ? (
-  //   <PageError />
-  // ) :
-  return (
+  return !camper ? (
+    <PageError />
+  ) : (
     <>
       <CamperForm
         initialCamper={camper}
-        onDeleteCamper={handleDeleteCamper}
-        onSave={handleEditCamper}
+        onDeleteCamper={() => deleteCamperMutation.mutate()}
+        onSave={() => editCamperMutation.mutate()}
       />
       {(editCamperMutation.isError || deleteCamperMutation.isError) && (
         <div>There&apos;s been an error</div>
@@ -80,7 +70,7 @@ const CamperEdit = ({ camper }: Props) => {
 
 export const getServerSideProps = async (context) => {
   const { BASE_URL } = process.env;
-  const camperId = parseInt(context.query.id);
+  const camperId = context.query.id;
 
   const camperRes = await fetch(`${BASE_URL}/api/campers?camperId=${camperId}`);
   const camperJson = await camperRes.json();

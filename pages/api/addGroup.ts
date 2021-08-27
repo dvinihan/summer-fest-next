@@ -1,13 +1,20 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import Group from '../../models/Group';
 import connectToDatabase from '../../util/mongodb';
 
-export default async (req, res) => {
-  const { db } = await connectToDatabase();
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const db = await connectToDatabase();
 
-  db.collection('groups').insertOne(req.body, (err, res) => {
-    if (err) throw err;
+  try {
+    const { insertedId } = await db
+      .collection('groups')
+      .insertOne(new Group(req.body));
     console.log('1 document inserted');
-    // db.close();
-  });
 
-  res.json({});
+    const group = await db.collection('groups').findOne({ _id: insertedId });
+
+    res.json(group.id);
+  } catch (error) {
+    throw error;
+  }
 };

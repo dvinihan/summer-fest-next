@@ -1,39 +1,21 @@
 import React, { useEffect } from 'react';
 import { getActiveUserClearance } from '../helpers';
-import Group from '../models/Group';
 import GroupForm from '../components/GroupForm';
-import { useMutation } from 'react-query';
-import axios from 'axios';
 import router from 'next/router';
 import Loading from '../components/Loading';
 import { Container } from '@material-ui/core';
 import UserError from '../components/UserError';
+import { useAddGroup } from '../queries/group';
 
-interface Props {
-  groups: Group[];
-}
-
-const GroupAdd = ({ groups }: Props) => {
-  const maxGroupId = groups.reduce((max, group) => Math.max(max, group.id), 0);
-  const newGroupId = maxGroupId + 1;
-
-  const mutation = useMutation((newGroup: Group) =>
-    axios.post('/api/addGroup', newGroup)
-  );
+const GroupAdd = () => {
+  const addGroupMutation = useAddGroup();
 
   useEffect(() => {
-    if (mutation.isSuccess) {
-      router.push(`/groupEdit?id=${newGroupId}`);
+    if (addGroupMutation.isSuccess) {
+      const axiosResponse = addGroupMutation.data;
+      router.push(`groupEdit?id=${axiosResponse.data}`);
     }
   });
-
-  const handleAddGroup = (group: Group) => {
-    mutation.mutate({
-      id: newGroupId,
-      group_name: group.group_name,
-      leader_name: group.leader_name,
-    });
-  };
 
   // const activeUserClearance = getActiveUserClearance();
   // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
@@ -41,14 +23,13 @@ const GroupAdd = ({ groups }: Props) => {
   //   return null;
   // }
 
-  if (!mutation.isIdle) {
-    return <Loading isOpen />;
-  }
-
   return (
     <Container>
-      <GroupForm onSave={handleAddGroup} />
-      {mutation.isError && <UserError />}
+      {/* query will be idle until the first mutation call has been made */}
+      {!addGroupMutation.isIdle && <Loading isOpen />}
+
+      <GroupForm onSave={addGroupMutation.mutate} />
+      {addGroupMutation.isError && <UserError />}
     </Container>
   );
 };
