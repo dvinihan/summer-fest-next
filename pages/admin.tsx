@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
 import {
   Button,
+  Container,
   Grid,
   Link,
   Paper,
@@ -32,69 +33,71 @@ const Admin = () => {
   // }
 
   return (
-    <Grid
-      container
-      direction="column"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Grid item>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell />
-                <TableCell>Group Name</TableCell>
-                <TableCell>Leader</TableCell>
-              </TableRow>
-            </TableHead>
+    <Container maxWidth="xl">
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Grid item>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>Group Name</TableCell>
+                  <TableCell>Leader</TableCell>
+                </TableRow>
+              </TableHead>
 
-            <TableBody>
-              {groups.map((group: Group) =>
-                group.id === 1 ? null : (
-                  <TableRow key={group.id}>
-                    <TableCell>
-                      <Link href={`/groupEdit?id=${group.id}`}>Edit</Link>
-                    </TableCell>
-                    <TableCell>{group.group_name}</TableCell>
-                    <TableCell>{group.leader_name}</TableCell>
-                  </TableRow>
-                )
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Grid>
+              <TableBody>
+                {groups.map((group: Group) =>
+                  group.id === 1 ? null : (
+                    <TableRow key={group.id}>
+                      <TableCell>
+                        <Link href={`/groupEdit?id=${group.id}`}>Edit</Link>
+                      </TableCell>
+                      <TableCell>{group.group_name}</TableCell>
+                      <TableCell>{group.leader_name}</TableCell>
+                    </TableRow>
+                  )
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>
 
-      <Grid item>
-        <Grid
-          container
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Grid item>
-            <Link href="/groupAdd">Add a Group</Link>
-          </Grid>
-          <Grid item>
-            <Link href="/userAdd">Add a User</Link>
-          </Grid>
-          <Grid item>
-            <Link href="/users">View All Users</Link>
-          </Grid>
-          <Grid item>
-            <Button
-              onClick={() =>
-                handleDownload({ groups, campers, users, isAdmin: true })
-              }
-              type="button"
-            >
-              Download All Data
-            </Button>
+        <Grid item>
+          <Grid
+            container
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Grid item>
+              <Link href="/groupAdd">Add a Group</Link>
+            </Grid>
+            <Grid item>
+              <Link href="/userAdd">Add a User</Link>
+            </Grid>
+            <Grid item>
+              <Link href="/users">View All Users</Link>
+            </Grid>
+            <Grid item>
+              <Button
+                onClick={() =>
+                  handleDownload({ groups, campers, users, isAdmin: true })
+                }
+                type="button"
+              >
+                Download All Data
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </Container>
   );
 };
 

@@ -16,7 +16,7 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
-import UserError from '../components/UserError';
+import UserError from '../components/FormError';
 import { NextPageContext } from 'next';
 import getQueryParamId from '../helpers/getQueryParamId';
 import { useDownloadCovidImage } from '../queries/images';
@@ -32,26 +32,24 @@ import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import { fetchCampersInGroup } from '../queries/campers';
 import { fetchGroupUsers } from '../queries/users';
+import PageError from '../components/PageError';
+import Group from '../models/Group';
 
 interface Props {
-  campers: Camper[];
-  groupUser?: User;
+  group: Group;
 }
 
-const GroupEdit = ({}: Props) => {
+const GroupEdit = ({ group }: Props) => {
   const router = useRouter();
 
-  const groupId = getQueryParamId(router.query.id);
-  const groupsQuery = useQuery('groups', () => fetchGroupsById(groupId));
-  // there should only be one group with this id
-  const group = groupsQuery.data[0];
-
-  const campersQuery = useQuery('campersInGroup', () =>
-    fetchCampersInGroup(groupId)
+  const { data: campers = [] } = useQuery('campersInGroup', () =>
+    fetchCampersInGroup(group.id)
   );
-  const usersQuery = useQuery('groupUsers', () => fetchGroupUsers(groupId));
+  const { data: users = [] } = useQuery('groupUsers', () =>
+    fetchGroupUsers(group.id)
+  );
   // there should only be one user with this groupId
-  const groupUser = usersQuery.data[0];
+  const groupUser = users[0];
 
   const activeUserClearance = getActiveUserClearance();
 
@@ -155,7 +153,7 @@ const GroupEdit = ({}: Props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {campersQuery.data.map((camper) => (
+            {campers.map((camper: Camper) => (
               <TableRow key={camper.id}>
                 <TableCell>
                   <Link href={`/camperEdit?id=${camper.id}`}>Edit</Link>
@@ -201,15 +199,35 @@ const GroupEdit = ({}: Props) => {
 
       <Grid container justifyContent="center" alignItems="center">
         <Grid item>
-          <Button
-            onClick={() => handleDownload({ campers: campersQuery.data })}
-          >
+          <Button onClick={() => handleDownload({ campers })}>
             Click here to download an Excel file with all your campers
           </Button>
         </Grid>
       </Grid>
     </>
   );
+};
+
+const GroupEditContainer = () => {
+  const router = useRouter();
+  const groupId = getQueryParamId(router.query.id);
+
+  if (!groupId) {
+    return <PageError />;
+  }
+
+  const { data: groups = [] } = useQuery('groups', () =>
+    fetchGroupsById(groupId)
+  );
+
+  // there should only be one group with this id
+  const group = groups[0];
+
+  if (!group) {
+    return <PageError />;
+  }
+
+  return <GroupEdit group={group} />;
 };
 
 export const getServerSideProps = async (context: NextPageContext) => {
@@ -225,13 +243,13 @@ export const getServerSideProps = async (context: NextPageContext) => {
     await queryClient.prefetchQuery('groupUsers', () =>
       fetchGroupUsers(groupId)
     );
-
-    return {
-      props: {
-        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
-      },
-    };
   }
+
+  return {
+    props: {
+      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+    },
+  };
 };
 
-export default GroupEdit;
+export default GroupEditContainer;

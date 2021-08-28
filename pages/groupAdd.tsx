@@ -4,7 +4,7 @@ import GroupForm from '../components/GroupForm';
 import router from 'next/router';
 import Loading from '../components/Loading';
 import { Container } from '@material-ui/core';
-import UserError from '../components/UserError';
+import UserError from '../components/FormError';
 import { useAddGroup } from '../queries/groups';
 
 const GroupAdd = () => {
