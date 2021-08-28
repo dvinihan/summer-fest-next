@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
 import Camper from '../models/Camper';
@@ -43,12 +43,14 @@ const GroupEdit = ({}: Props) => {
 
   const groupId = getQueryParamId(router.query.id);
   const groupsQuery = useQuery('groups', () => fetchGroupsById(groupId));
+  // there should only be one group with this id
   const group = groupsQuery.data[0];
 
   const campersQuery = useQuery('campersInGroup', () =>
     fetchCampersInGroup(groupId)
   );
   const usersQuery = useQuery('groupUsers', () => fetchGroupUsers(groupId));
+  // there should only be one user with this groupId
   const groupUser = usersQuery.data[0];
 
   const activeUserClearance = getActiveUserClearance();
@@ -56,6 +58,12 @@ const GroupEdit = ({}: Props) => {
   const editGroupMutation = useEditGroup();
   const deleteGroupMutation = useDeleteGroup();
   const downloadCovidImageMutation = useDownloadCovidImage();
+
+  useEffect(() => {
+    if (editGroupMutation.isSuccess || deleteGroupMutation.isSuccess) {
+      router.push(`/admin`);
+    }
+  });
 
   const handleDownloadCovidImage = (covidFileName: string) => {
     downloadCovidImageMutation.mutate(covidFileName);
@@ -86,7 +94,7 @@ const GroupEdit = ({}: Props) => {
 
   return (
     <>
-      {(editGroupMutation.isLoading || deleteGroupMutation.isLoading) && (
+      {(!editGroupMutation.isIdle || !deleteGroupMutation.isIdle) && (
         <Loading isOpen />
       )}
 

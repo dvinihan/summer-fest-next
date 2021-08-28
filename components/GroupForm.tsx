@@ -1,5 +1,5 @@
 import { Button, Grid, Modal, Paper, TextField } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { getActiveUserClearance } from '../helpers';
 import Group from '../models/Group';
 import User from '../models/User';
@@ -19,12 +19,6 @@ export const GroupForm = ({
 }: Props) => {
   const [group, setGroup] = useState(initialGroup ?? new Group());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  // to handle data hydration from react-query
-  useEffect(() => {
-    console.log(initialGroup);
-    setGroup(initialGroup);
-  }, [initialGroup]);
 
   const activeUserClearance = getActiveUserClearance();
 
@@ -59,7 +53,8 @@ export const GroupForm = ({
             Save
           </Button>
         </Grid>
-        {onDeleteGroup && activeUserClearance === 'admin' && (
+        {onDeleteGroup && (
+          // && activeUserClearance === 'admin'
           <Grid item>
             <Button onClick={() => setShowDeleteModal(true)}>Delete</Button>
           </Grid>
@@ -68,7 +63,7 @@ export const GroupForm = ({
 
       {showDeleteModal && (
         <Modal open>
-          <>
+          <Paper>
             <h1>
               Are you sure you want to PERMANENTLY delete{' '}
               {initialGroup.group_name} and all its campers
@@ -79,7 +74,7 @@ export const GroupForm = ({
             </h1>
             <Button onClick={() => setShowDeleteModal(false)}>No</Button>
             <Button onClick={() => onDeleteGroup(group.id)}>Yes</Button>
-          </>
+          </Paper>
         </Modal>
       )}
     </Paper>

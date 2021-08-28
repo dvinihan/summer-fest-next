@@ -5,9 +5,9 @@ import connectToDatabase from '../../util/mongodb';
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const db = await connectToDatabase();
 
-  const groupId = getQueryParamId(req.query.id);
+  const camperId = getQueryParamId(req.query.id);
   try {
-    await db.collection('groups').deleteOne({ id: groupId });
+    await db.collection('campers').deleteOne({ id: camperId });
     console.log('1 document deleted');
   } catch (error) {
     throw error;

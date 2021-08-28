@@ -1,9 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
-import Camper from '../models/Camper';
-import Group from '../models/Group';
-import User from '../models/User';
 import {
   Button,
   Grid,
@@ -17,15 +14,16 @@ import {
   TableRow,
 } from '@material-ui/core';
 import handleDownload from '../helpers/downloadCSV';
+import { QueryClient, useQuery } from 'react-query';
+import { fetchAllData } from '../queries/allData';
+import { dehydrate } from 'react-query/hydration';
+import Group from '../models/Group';
 
-interface Props {
-  campers: Camper[];
-  groups: Group[];
-  users: User[];
-}
-
-const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
+const Admin = () => {
   const router = useRouter();
+
+  const allDataQuery = useQuery('allData', () => fetchAllData());
+  const { campers, groups, users } = allDataQuery.data;
 
   // const activeUserClearance = getActiveUserClearance();
   // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
@@ -52,7 +50,7 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
             </TableHead>
 
             <TableBody>
-              {groups.map((group) =>
+              {groups.map((group: Group) =>
                 group.id === 1 ? null : (
                   <TableRow key={group.id}>
                     <TableCell>
@@ -101,13 +99,13 @@ const Admin = ({ campers = [], groups = [], users = [] }: Props) => {
 };
 
 export async function getStaticProps() {
-  const { NEXT_PUBLIC_BASE_URL } = process.env;
-
-  const res = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/allData`);
-  const json = await res.json();
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery('allData', () => fetchAllData());
 
   return {
-    props: json,
+    props: {
+      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+    },
   };
 }
 

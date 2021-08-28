@@ -6,7 +6,7 @@ const getQueryParamId = (queryParam?: string | string[]) => {
     return parseInt(queryParam);
   }
 
-  // then it must be an array
+  // then it must be an array. We only care about one ID
   return parseInt(queryParam[0]);
 };
 

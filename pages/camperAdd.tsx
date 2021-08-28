@@ -6,10 +6,11 @@ import axios from 'axios';
 import Loading from '../components/Loading';
 import PageError from '../components/PageError';
 import CamperForm from '../components/CamperForm';
+import getQueryParamId from '../helpers/getQueryParamId';
 
 const CamperAdd = () => {
   const router = useRouter();
-  const groupId = router.query.groupId;
+  const groupId = getQueryParamId(router.query.groupId);
 
   const mutation = useMutation((camper: Camper) => {
     return axios.post('/api/addCamper', camper);

@@ -309,14 +309,14 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
           )}
           {showDeleteModal && (
             <Modal open>
-              <>
+              <Paper>
                 <h1>
                   Are you sure you want to PERMANENTLY delete{' '}
                   {camper.first_name} {camper.last_name}?
                 </h1>
                 <Button onClick={() => setShowDeleteModal(false)}>No</Button>
                 <Button onClick={() => onDeleteCamper(camper.id)}>Yes</Button>
-              </>
+              </Paper>
             </Modal>
           )}
         </Grid>

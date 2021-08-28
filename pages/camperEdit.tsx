@@ -1,26 +1,28 @@
-import axios from 'axios';
+import { NextPageContext } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
-import { useMutation } from 'react-query';
+import { QueryClient, useQuery } from 'react-query';
+import { dehydrate } from 'react-query/hydration';
 import CamperForm from '../components/CamperForm';
 import Loading from '../components/Loading';
 import PageError from '../components/PageError';
-import Camper from '../models/Camper';
+import getQueryParamId from '../helpers/getQueryParamId';
+import {
+  fetchCamperById,
+  useDeleteCamper,
+  useEditCamper,
+} from '../queries/campers';
 
-interface Props {
-  groupId: string;
-  camper?: Camper;
-}
-
-const CamperEdit = ({ camper }: Props) => {
+const CamperEdit = () => {
   const router = useRouter();
 
-  const editCamperMutation = useMutation((currentCamper) =>
-    axios.post('/api/editCamper', currentCamper)
-  );
-  const deleteCamperMutation = useMutation((camperId) =>
-    axios.post('/api/deleteCamper', camperId)
-  );
+  const camperId = getQueryParamId(router.query.id);
+  const camperQuery = useQuery('camperById', () => fetchCamperById(camperId));
+  // there should only be one camper with this id
+  const camper = camperQuery.data[0];
+
+  const editCamperMutation = useEditCamper();
+  const deleteCamperMutation = useDeleteCamper();
 
   useEffect(() => {
     if (editCamperMutation.isSuccess || deleteCamperMutation.isSuccess) {
@@ -58,8 +60,8 @@ const CamperEdit = ({ camper }: Props) => {
     <>
       <CamperForm
         initialCamper={camper}
-        onDeleteCamper={() => deleteCamperMutation.mutate()}
-        onSave={() => editCamperMutation.mutate()}
+        onDeleteCamper={deleteCamperMutation.mutate}
+        onSave={editCamperMutation.mutate}
       />
       {(editCamperMutation.isError || deleteCamperMutation.isError) && (
         <div>There&apos;s been an error</div>
@@ -68,20 +70,22 @@ const CamperEdit = ({ camper }: Props) => {
   );
 };
 
-export const getServerSideProps = async (context) => {
-  const { NEXT_PUBLIC_BASE_URL } = process.env;
-  const camperId = context.query.id;
+export const getServerSideProps = async (context: NextPageContext) => {
+  const queryClient = new QueryClient();
 
-  const camperRes = await fetch(
-    `${NEXT_PUBLIC_BASE_URL}/api/campers?camperId=${camperId}`
-  );
-  const camperJson = await camperRes.json();
+  const camperId = getQueryParamId(context.query.id);
 
-  return {
-    props: {
-      camper: camperJson,
-    },
-  };
+  if (camperId) {
+    await queryClient.prefetchQuery('camperById', () =>
+      fetchCamperById(camperId)
+    );
+
+    return {
+      props: {
+        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+      },
+    };
+  }
 };
 
 export default CamperEdit;
