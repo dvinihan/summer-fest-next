@@ -49,10 +49,10 @@ export const GroupForm = ({
     setGroup({ ...group, [e.target.name]: e.target.value });
   };
 
-  const userDeleteMessage = groupUser
-    ? `, along with the user ${groupUser.username}`
-    : '';
-  const deleteMessage = `Are you sure you want to PERMANENTLY delete ${initialGroup.group_name} and all its campers${userDeleteMessage}?`;
+  const handleDelete = () => {
+    onDeleteGroup(group.id);
+    setShowDeleteModal(false);
+  };
 
   return (
     <Paper className={classes.root}>
@@ -113,8 +113,12 @@ export const GroupForm = ({
 
         {showDeleteModal && (
           <DeleteModal
-            message={deleteMessage}
-            onAccept={() => onDeleteGroup(group.id)}
+            message={`Are you sure you want to PERMANENTLY delete ${
+              initialGroup.group_name
+            } and all its campers${
+              groupUser ? `, along with the user ${groupUser.username}` : ''
+            }?`}
+            onAccept={handleDelete}
             onDecline={() => setShowDeleteModal(false)}
           />
         )}

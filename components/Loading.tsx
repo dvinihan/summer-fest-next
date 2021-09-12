@@ -7,15 +7,11 @@ const useStyles = makeStyles({
   },
 });
 
-interface Props {
-  isOpen: boolean;
-}
-
-export const Loading = ({ isOpen }: Props) => {
+export const Loading = () => {
   const classes = useStyles();
 
   return (
-    <Modal open={isOpen}>
+    <Modal open>
       <Grid
         container
         justifyContent="center"

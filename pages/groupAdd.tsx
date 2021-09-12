@@ -4,7 +4,7 @@ import GroupForm from '../components/GroupForm';
 import router from 'next/router';
 import Loading from '../components/Loading';
 import { Container, Grid } from '@material-ui/core';
-import UserError from '../components/FormError';
+import FormError from '../components/FormError';
 import { useAddGroup } from '../queries/groups';
 
 const GroupAdd = () => {
@@ -23,9 +23,12 @@ const GroupAdd = () => {
   //   return null;
   // }
 
+  const showLoadingModal =
+    addGroupMutation.isLoading || addGroupMutation.isSuccess;
+
   return (
     <Container>
-      {!addGroupMutation.isIdle && <Loading isOpen />}
+      {showLoadingModal && <Loading />}
 
       <Grid
         container
@@ -37,9 +40,13 @@ const GroupAdd = () => {
         <Grid item>
           <GroupForm onSave={addGroupMutation.mutate} />
         </Grid>
-      </Grid>
 
-      {addGroupMutation.isError && <UserError />}
+        {addGroupMutation.isError && (
+          <Grid item>
+            <FormError />
+          </Grid>
+        )}
+      </Grid>
     </Container>
   );
 };

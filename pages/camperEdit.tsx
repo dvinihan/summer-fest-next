@@ -1,9 +1,11 @@
+import { Grid } from '@material-ui/core';
 import { NextPageContext } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import CamperForm from '../components/CamperForm';
+import FormError from '../components/FormError';
 import Loading from '../components/Loading';
 import PageError from '../components/PageError';
 import getQueryParamId from '../helpers/getQueryParamId';
@@ -30,10 +32,6 @@ const CamperEdit = () => {
     }
   });
 
-  if (!editCamperMutation.isIdle && !deleteCamperMutation.isIdle) {
-    return <Loading isOpen />;
-  }
-
   //   if (shouldRedirect) {
   //     return (
   //       <Redirect
@@ -54,18 +52,38 @@ const CamperEdit = () => {
   //     );
   //   }
 
+  const showLoadingModal =
+    editCamperMutation.isLoading ||
+    deleteCamperMutation.isLoading ||
+    editCamperMutation.isSuccess ||
+    deleteCamperMutation.isSuccess;
+
   return !camper ? (
     <PageError />
   ) : (
     <>
-      <CamperForm
-        initialCamper={camper}
-        onDeleteCamper={deleteCamperMutation.mutate}
-        onSave={editCamperMutation.mutate}
-      />
-      {(editCamperMutation.isError || deleteCamperMutation.isError) && (
-        <div>There&apos;s been an error</div>
-      )}
+      {showLoadingModal && <Loading />}
+
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={1}
+      >
+        <Grid item>
+          <CamperForm
+            initialCamper={camper}
+            onDeleteCamper={deleteCamperMutation.mutate}
+            onSave={editCamperMutation.mutate}
+          />
+        </Grid>
+        {(editCamperMutation.isError || deleteCamperMutation.isError) && (
+          <Grid item>
+            <FormError />
+          </Grid>
+        )}
+      </Grid>
     </>
   );
 };

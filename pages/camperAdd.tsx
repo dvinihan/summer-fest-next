@@ -7,6 +7,8 @@ import Loading from '../components/Loading';
 import PageError from '../components/PageError';
 import CamperForm from '../components/CamperForm';
 import getQueryParamId from '../helpers/getQueryParamId';
+import FormError from '../components/FormError';
+import { Grid } from '@material-ui/core';
 
 const CamperAdd = () => {
   const router = useRouter();
@@ -24,21 +26,31 @@ const CamperAdd = () => {
     }
   });
 
-  if (!mutation.isIdle) {
-    return <Loading isOpen />;
-  }
+  const showLoading = mutation.isLoading || mutation.isSuccess;
 
   return !groupId ? (
     <PageError />
   ) : (
     <>
-      <CamperForm
-        initialCamper={
-          new Camper({ group_id: groupId, signed_status: 'Not Sent' })
-        }
-        onSave={handleSave}
-      />
-      {mutation.isError && <div>There&apos;s been an error</div>}
+      {showLoading && <Loading />}
+
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={1}
+      >
+        <Grid item>
+          <CamperForm
+            initialCamper={
+              new Camper({ group_id: groupId, signed_status: 'Not Sent' })
+            }
+            onSave={handleSave}
+          />
+        </Grid>
+        <Grid item>{mutation.isError && <FormError />}</Grid>
+      </Grid>
     </>
   );
 };
