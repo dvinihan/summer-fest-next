@@ -6,6 +6,7 @@ import User from '../models/User';
 import GroupForm from '../components/GroupForm';
 import {
   Button,
+  Container,
   Grid,
   Link,
   Paper,
@@ -34,13 +35,24 @@ import { fetchCampersInGroup } from '../queries/campers';
 import { fetchGroupUsers } from '../queries/users';
 import PageError from '../components/PageError';
 import Group from '../models/Group';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface Props {
   group: Group;
 }
 
+const useStyles = makeStyles((theme: any) => ({
+  button: {
+    padding: theme.spacing(1),
+  },
+  wideCell: {
+    minWidth: 300,
+  },
+}));
+
 const GroupEdit = ({ group }: Props) => {
   const router = useRouter();
+  const classes = useStyles();
 
   const { data: campers = [] } = useQuery('campersInGroup', () =>
     fetchCampersInGroup(group.id)
@@ -91,7 +103,7 @@ const GroupEdit = ({ group }: Props) => {
   //   }
 
   return (
-    <>
+    <Container>
       {(!editGroupMutation.isIdle || !deleteGroupMutation.isIdle) && (
         <Loading isOpen />
       )}
@@ -101,6 +113,7 @@ const GroupEdit = ({ group }: Props) => {
         direction="column"
         justifyContent="center"
         alignItems="center"
+        spacing={1}
       >
         <Grid item>
           <GroupForm
@@ -116,95 +129,105 @@ const GroupEdit = ({ group }: Props) => {
         )}
 
         <Grid item>
-          <h2>Campers</h2>
+          <h1>Campers</h1>
         </Grid>
-        <Grid item>
-          <Link href={`/camperAdd?groupId=${group.id}`}>Add a Camper</Link>
-        </Grid>
-      </Grid>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>First Name</TableCell>
-              <TableCell>Last Name</TableCell>
-              <TableCell>Gender</TableCell>
-              <TableCell>Birthday</TableCell>
-              <TableCell>Grade just completed</TableCell>
-              <TableCell>Food Alergies</TableCell>
-              <TableCell>Parent or Guardian Email</TableCell>
-              <TableCell>Emergency Contact Name</TableCell>
-              <TableCell>Emergency Contact Number</TableCell>
-              <TableCell>Roommate</TableCell>
-              <TableCell>Notes</TableCell>
-              <TableCell>Online or Paper Registration</TableCell>
-              <TableCell>Waiver Signed Status</TableCell>
-              <TableCell>Waiver Signed By</TableCell>
-              {activeUserClearance === 'admin' && (
-                <TableCell>Room Assignment</TableCell>
-              )}
-              <TableCell>Is Adult Leader</TableCell>
-              <TableCell>Student Leadership Track</TableCell>
-              <TableCell>Camp Attending</TableCell>
-              <TableCell>COVID Image Type</TableCell>
-              <TableCell>COVID Image</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {campers.map((camper: Camper) => (
-              <TableRow key={camper.id}>
-                <TableCell>
-                  <Link href={`/camperEdit?id=${camper.id}`}>Edit</Link>
-                </TableCell>
-                <TableCell>{camper.first_name}</TableCell>
-                <TableCell>{camper.last_name}</TableCell>
-                <TableCell>{camper.gender}</TableCell>
-                <TableCell>{camper.birthday}</TableCell>
-                <TableCell>{camper.grade_completed}</TableCell>
-                <TableCell>{camper.allergies}</TableCell>
-                <TableCell>{camper.parent_email}</TableCell>
-                <TableCell>{camper.emergency_name}</TableCell>
-                <TableCell>{camper.emergency_number}</TableCell>
-                <TableCell>{camper.roommate}</TableCell>
-                <TableCell>{camper.notes}</TableCell>
-                <TableCell>{camper.registration}</TableCell>
-                <TableCell>{camper.signed_status}</TableCell>
-                <TableCell>{camper.signed_by}</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>First Name</TableCell>
+                <TableCell>Last Name</TableCell>
+                <TableCell>Gender</TableCell>
+                <TableCell>Birthday</TableCell>
+                <TableCell>Grade just completed</TableCell>
+                <TableCell>Food Alergies</TableCell>
+                <TableCell>Parent or Guardian Email</TableCell>
+                <TableCell>Emergency Contact Name</TableCell>
+                <TableCell>Emergency Contact Number</TableCell>
+                <TableCell>Roommate</TableCell>
+                <TableCell>Online or Paper Registration</TableCell>
+                <TableCell>Waiver Signed Status</TableCell>
+                <TableCell>Waiver Signed By</TableCell>
                 {activeUserClearance === 'admin' && (
-                  <TableCell>{camper.room}</TableCell>
+                  <TableCell>Room Assignment</TableCell>
                 )}
-                <TableCell>{camper.adult_leader}</TableCell>
-                <TableCell>{camper.student_leadership_track}</TableCell>
-                <TableCell>{camper.camp_attending}</TableCell>
-                <TableCell>{camper.covid_image_type}</TableCell>
-                <TableCell>
-                  {camper.covid_image_file_name && (
-                    <Button
-                      style={{ cursor: 'pointer' }}
-                      onClick={() =>
-                        handleDownloadCovidImage(camper.covid_image_file_name)
-                      }
-                    >
-                      Download
-                    </Button>
-                  )}
-                </TableCell>
+                <TableCell>Is Adult Leader</TableCell>
+                <TableCell>Student Leadership Track</TableCell>
+                <TableCell>Camp Attending</TableCell>
+                <TableCell>COVID Image Type</TableCell>
+                <TableCell>COVID Image</TableCell>
+                <TableCell className={classes.wideCell}>Notes</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {campers.map((camper: Camper) => (
+                <TableRow key={camper.id}>
+                  <TableCell>
+                    <Link href={`/camperEdit?id=${camper.id}`}>Edit</Link>
+                  </TableCell>
+                  <TableCell>{camper.first_name}</TableCell>
+                  <TableCell>{camper.last_name}</TableCell>
+                  <TableCell>{camper.gender}</TableCell>
+                  <TableCell>{camper.birthday}</TableCell>
+                  <TableCell>{camper.grade_completed}</TableCell>
+                  <TableCell>{camper.allergies}</TableCell>
+                  <TableCell>{camper.parent_email}</TableCell>
+                  <TableCell>{camper.emergency_name}</TableCell>
+                  <TableCell>{camper.emergency_number}</TableCell>
+                  <TableCell>{camper.roommate}</TableCell>
 
-      <Grid container justifyContent="center" alignItems="center">
+                  <TableCell>{camper.registration}</TableCell>
+                  <TableCell>{camper.signed_status}</TableCell>
+                  <TableCell>{camper.signed_by}</TableCell>
+                  {activeUserClearance === 'admin' && (
+                    <TableCell>{camper.room}</TableCell>
+                  )}
+                  <TableCell>{camper.adult_leader}</TableCell>
+                  <TableCell>{camper.student_leadership_track}</TableCell>
+                  <TableCell>{camper.camp_attending}</TableCell>
+                  <TableCell>{camper.covid_image_type}</TableCell>
+                  <TableCell>
+                    {camper.covid_image_file_name && (
+                      <Button
+                        style={{ cursor: 'pointer' }}
+                        onClick={() =>
+                          handleDownloadCovidImage(camper.covid_image_file_name)
+                        }
+                      >
+                        Download
+                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell className={classes.wideCell}>
+                    {camper.notes}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Grid item>
+          <Button onClick={() => router.push(`/camperAdd?groupId=${group.id}`)}>
+            <Paper className={classes.button}>
+              <Container>Add a Camper</Container>
+            </Paper>
+          </Button>
+        </Grid>
+
         <Grid item>
           <Button onClick={() => handleDownload({ campers })}>
-            Click here to download an Excel file with all your campers
+            <Paper className={classes.button}>
+              <Container>
+                Download an Excel file with all your campers
+              </Container>
+            </Paper>
           </Button>
         </Grid>
       </Grid>
-    </>
+    </Container>
   );
 };
 

@@ -3,7 +3,7 @@ import { getActiveUserClearance } from '../helpers';
 import GroupForm from '../components/GroupForm';
 import router from 'next/router';
 import Loading from '../components/Loading';
-import { Container } from '@material-ui/core';
+import { Container, Grid } from '@material-ui/core';
 import UserError from '../components/FormError';
 import { useAddGroup } from '../queries/groups';
 
@@ -27,7 +27,18 @@ const GroupAdd = () => {
     <Container>
       {!addGroupMutation.isIdle && <Loading isOpen />}
 
-      <GroupForm onSave={addGroupMutation.mutate} />
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={1}
+      >
+        <Grid item>
+          <GroupForm onSave={addGroupMutation.mutate} />
+        </Grid>
+      </Grid>
+
       {addGroupMutation.isError && <UserError />}
     </Container>
   );
