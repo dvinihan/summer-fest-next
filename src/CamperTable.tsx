@@ -8,27 +8,28 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  useTheme,
 } from '@mui/material';
+import { useMutation } from 'react-query';
 import { getActiveUserClearance } from '../helpers';
 import downloadImage from '../helpers/downloadImage';
 import Camper from '../models/Camper';
-import { useDownloadCovidImage } from '../queries/images';
+import { downloadCovidImage } from '../queries/images';
 
 interface Props {
   campers: Camper[];
 }
 
 const CamperTable = ({ campers }: Props) => {
-  const downloadCovidImageMutation = useDownloadCovidImage();
+  const { mutate } = useMutation(downloadCovidImage, {
+    onSuccess: (data, { covidImageFileName }) => {
+      downloadImage(covidImageFileName, data);
+    },
+  });
 
   const activeUserClearance = getActiveUserClearance();
 
-  const handleDownloadCovidImage = (covidFileName: string) => {
-    downloadCovidImageMutation.mutate(covidFileName);
-
-    const axiosResponse = downloadCovidImageMutation.data;
-    downloadImage(covidFileName, axiosResponse.data);
+  const handleDownloadCovidImage = (covidImageFileName: string) => {
+    mutate({ covidImageFileName });
   };
 
   return (

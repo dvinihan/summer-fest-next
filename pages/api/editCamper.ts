@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import Camper from '../../models/Camper';
 import connectToDatabase from '../../util/mongodb';
+import uploadToS3 from '../../util/uploadToS3';
 
 interface EditCamperRequest extends NextApiRequest {
   body: Camper;
@@ -9,10 +10,27 @@ interface EditCamperRequest extends NextApiRequest {
 export default async (req: EditCamperRequest, res: NextApiResponse) => {
   const db = await connectToDatabase();
 
+  let covidFileName = '';
+  if (req.body.covid_image) {
+    covidFileName = `covid_image_${req.body.first_name}_${
+      req.body.last_name
+    }_${Math.floor(Math.random() * 10000000000)}.jpg`;
+
+    uploadToS3(req.body.covid_image, covidFileName);
+  }
+
   try {
     await db
       .collection('campers')
-      .updateOne({ id: req.body.id }, { $set: new Camper(req.body) });
+      .updateOne(
+        { id: req.body.id },
+        {
+          $set: new Camper({
+            ...req.body,
+            covid_image_file_name: covidFileName,
+          }),
+        }
+      );
     console.log('1 document updated');
   } catch (error) {
     throw error;

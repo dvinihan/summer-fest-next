@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Button, Grid, InputLabel } from '@mui/material';
 import ImageViewer from 'react-simple-image-viewer';
 import axios from 'axios';
+import { downloadCovidImage } from '../queries/images';
+import { useMutation } from 'react-query';
 
 interface Props {
   oldImageFileName: string;
@@ -22,21 +24,25 @@ const CovidImages = ({
   const [oldCovidImage, setOldCovidImage] = useState('');
   const [newCovidImage, setNewCovidImage] = useState('');
 
-  // on first load, download file name if it already exists
+  const { mutate, data } = useMutation(downloadCovidImage);
+
+  // on first load, download file if it already exists
   useEffect(() => {
     if (oldImageFileName) {
-      axios.post('/api/downloadCovidImage', oldImageFileName).then((res) => {
-        const image = `data:image/jpeg;base64,${res.data.encodedImage}`;
-        setOldCovidImage(image);
-      });
+      mutate(oldImageFileName);
     }
   }, []);
+  useEffect(() => {
+    if (data) {
+      const image = `data:image/jpeg;base64,${data}`;
+      setOldCovidImage(image);
+    }
+  }, [data]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
 
-    console.log(file);
-    if (e.target.files[0].type !== 'image/jpeg') {
+    if (file.type !== 'image/jpeg') {
       setShowFileTypeError(true);
       return;
     }
@@ -48,7 +54,7 @@ const CovidImages = ({
       setNewCovidImage(newImage);
       setImage(newImage);
     };
-    reader.readAsDataURL(e.target.files[0]);
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -60,9 +66,12 @@ const CovidImages = ({
       {isEditingCamper && (
         <Grid item>
           <p>Current file: {newImageFileName}</p>
-          <Button onClick={() => setIsViewerOpenOldPic(true)}>
-            <img src={oldCovidImage} width="300px" />
-          </Button>
+
+          {oldCovidImage && (
+            <Button onClick={() => setIsViewerOpenOldPic(true)}>
+              <img src={oldCovidImage} width="300px" />
+            </Button>
+          )}
 
           {isViewerOpenOldPic && (
             <Grid item>
@@ -77,11 +86,13 @@ const CovidImages = ({
             </Grid>
           )}
 
-          <Grid item>
-            <Button onClick={() => setIsViewerOpenNewPic(true)}>
-              <img src={newCovidImage} width="300px" />
-            </Button>
-          </Grid>
+          {newCovidImage && (
+            <Grid item>
+              <Button onClick={() => setIsViewerOpenNewPic(true)}>
+                <img src={newCovidImage} width="300px" />
+              </Button>
+            </Grid>
+          )}
 
           {isViewerOpenNewPic && (
             <Grid item>
