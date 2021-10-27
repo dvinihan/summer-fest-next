@@ -8,26 +8,18 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+  useTheme,
+} from '@mui/material';
 import { getActiveUserClearance } from '../helpers';
 import downloadImage from '../helpers/downloadImage';
 import Camper from '../models/Camper';
 import { useDownloadCovidImage } from '../queries/images';
-
-const useStyles = makeStyles((theme: any) => ({
-  wideCell: {
-    minWidth: 300,
-  },
-}));
 
 interface Props {
   campers: Camper[];
 }
 
 const CamperTable = ({ campers }: Props) => {
-  const classes = useStyles();
-
   const downloadCovidImageMutation = useDownloadCovidImage();
 
   const activeUserClearance = getActiveUserClearance();
@@ -66,7 +58,7 @@ const CamperTable = ({ campers }: Props) => {
             <TableCell>Camp Attending</TableCell>
             <TableCell>COVID Image Type</TableCell>
             <TableCell>COVID Image</TableCell>
-            <TableCell className={classes.wideCell}>Notes</TableCell>
+            <TableCell sx={{ minWidth: 300 }}>Notes</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -108,7 +100,7 @@ const CamperTable = ({ campers }: Props) => {
                   </Button>
                 )}
               </TableCell>
-              <TableCell className={classes.wideCell}>{camper.notes}</TableCell>
+              <TableCell sx={{ minWidth: 300 }}>{camper.notes}</TableCell>
             </TableRow>
           ))}
         </TableBody>

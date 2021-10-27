@@ -3,30 +3,30 @@ import Camper from '../models/Camper';
 import { useRouter } from 'next/router';
 import { useMutation } from 'react-query';
 import axios from 'axios';
-import Loading from '../components/Loading';
-import PageError from '../components/PageError';
-import CamperForm from '../components/CamperForm';
-import getQueryParamId from '../helpers/getQueryParamId';
-import FormError from '../components/FormError';
-import { Grid } from '@material-ui/core';
+import Loading from '../src/Loading';
+import PageError from '../src/PageError';
+import CamperForm from '../src/CamperForm';
+import { getQueryParamId } from '../helpers/getQueryParamId';
+import FormError from '../src/FormError';
+import { Grid } from '@mui/material';
 
 const CamperAdd = () => {
   const router = useRouter();
   const groupId = getQueryParamId(router.query.groupId);
 
-  const mutation = useMutation((camper: Camper) => {
-    return axios.post('/api/addCamper', camper);
-  });
+  const { mutate, isSuccess, isLoading, isError } = useMutation(
+    (camper: Camper) => axios.post('/api/addCamper', camper)
+  );
 
-  const handleSave = (camper: Camper) => mutation.mutate(camper);
+  const handleSave = (camper: Camper) => mutate(camper);
 
   useEffect(() => {
-    if (mutation.isSuccess) {
+    if (isSuccess) {
       router.push(`/groupEdit?id=${groupId}`);
     }
   });
 
-  const showLoading = mutation.isLoading || mutation.isSuccess;
+  const showLoading = isLoading || isSuccess;
 
   return !groupId ? (
     <PageError />
@@ -49,7 +49,7 @@ const CamperAdd = () => {
             onSave={handleSave}
           />
         </Grid>
-        <Grid item>{mutation.isError && <FormError />}</Grid>
+        <Grid item>{isError && <FormError />}</Grid>
       </Grid>
     </>
   );

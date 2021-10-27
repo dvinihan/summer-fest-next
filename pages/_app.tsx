@@ -1,10 +1,10 @@
 import '../styles/globals.css';
-import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Hydrate } from 'react-query/hydration';
 import Head from 'next/head';
-import { ThemeProvider } from '@material-ui/core/styles';
 import theme from '../styles/theme';
+import { ThemeProvider } from '@mui/material';
+import { useState } from 'react';
 
 export default function MyApp({ Component, pageProps }) {
   const [queryClient] = useState(() => new QueryClient());

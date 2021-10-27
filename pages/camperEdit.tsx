@@ -1,19 +1,17 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { NextPageContext } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
-import { QueryClient, useQuery } from 'react-query';
+import { QueryClient, useMutation, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-import CamperForm from '../components/CamperForm';
-import FormError from '../components/FormError';
-import Loading from '../components/Loading';
-import PageError from '../components/PageError';
-import getQueryParamId from '../helpers/getQueryParamId';
-import {
-  fetchCamperById,
-  useDeleteCamper,
-  useEditCamper,
-} from '../queries/campers';
+import CamperForm from '../src/CamperForm';
+import FormError from '../src/FormError';
+import Loading from '../src/Loading';
+import PageError from '../src/PageError';
+import { getQueryParamId } from '../helpers/getQueryParamId';
+import { fetchCamperById } from '../queries/campers';
+import axios from 'axios';
+import Camper from '../models/Camper';
 
 const CamperEdit = () => {
   const router = useRouter();
@@ -23,8 +21,12 @@ const CamperEdit = () => {
   // there should only be one camper with this id
   const camper = camperQuery.data[0];
 
-  const editCamperMutation = useEditCamper();
-  const deleteCamperMutation = useDeleteCamper();
+  const editCamperMutation = useMutation(
+    async (camper: Camper) => await axios.post('/api/editCamper', camper)
+  );
+  const deleteCamperMutation = useMutation(
+    async () => await axios.delete(`/api/deleteCamper?id=${camper.id}`)
+  );
 
   useEffect(() => {
     if (editCamperMutation.isSuccess || deleteCamperMutation.isSuccess) {

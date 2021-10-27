@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Grid, InputLabel } from '@material-ui/core';
+import { Button, Grid, InputLabel } from '@mui/material';
 import ImageViewer from 'react-simple-image-viewer';
 import axios from 'axios';
 

@@ -2,11 +2,10 @@ import {
   Button,
   Container,
   Grid,
-  Modal,
   Paper,
   TextField,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+  useTheme,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { getActiveUserClearance } from '../helpers';
 import Group from '../models/Group';
@@ -15,23 +14,10 @@ import DeleteModal from './DeleteModal';
 
 interface Props {
   initialGroup?: Group;
-  onDeleteGroup?: (groupId: number) => void;
+  onDeleteGroup?: () => void;
   onSave: (group: Group) => void;
   groupUser?: User;
 }
-
-const useStyles = makeStyles((theme: any) => ({
-  root: {
-    padding: theme.spacing(2),
-  },
-  button: {
-    padding: theme.spacing(1),
-  },
-  modal: {
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
-  },
-}));
 
 export const GroupForm = ({
   initialGroup,
@@ -39,7 +25,7 @@ export const GroupForm = ({
   onSave,
   groupUser,
 }: Props) => {
-  const classes = useStyles();
+  const theme = useTheme();
   const [group, setGroup] = useState(initialGroup ?? new Group());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -50,12 +36,12 @@ export const GroupForm = ({
   };
 
   const handleDelete = () => {
-    onDeleteGroup(group.id);
+    onDeleteGroup();
     setShowDeleteModal(false);
   };
 
   return (
-    <Paper className={classes.root}>
+    <Paper sx={{ padding: theme.spacing(2) }}>
       <Container>
         <Grid container direction="column" spacing={2}>
           <Grid item>

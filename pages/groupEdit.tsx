@@ -1,40 +1,30 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getActiveUserClearance } from '../helpers';
-import GroupForm from '../components/GroupForm';
-import { Button, Container, Grid, Paper } from '@material-ui/core';
-import FormError from '../components/FormError';
+import GroupForm from '../src/GroupForm';
+import { Button, Container, Grid, Paper, useTheme } from '@mui/material';
+import FormError from '../src/FormError';
 import { NextPageContext } from 'next';
-import getQueryParamId from '../helpers/getQueryParamId';
-import {
-  useEditGroup,
-  useDeleteGroup,
-  fetchGroupsById,
-} from '../queries/groups';
+import { getQueryParamId } from '../helpers/getQueryParamId';
+import { fetchGroupsById } from '../queries/groups';
 import handleDownload from '../helpers/downloadCSV';
-import Loading from '../components/Loading';
-import { QueryClient, useQuery } from 'react-query';
+import Loading from '../src/Loading';
+import { QueryClient, useMutation, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import { fetchCampersInGroup } from '../queries/campers';
 import { fetchGroupUsers } from '../queries/users';
-import PageError from '../components/PageError';
+import PageError from '../src/PageError';
 import Group from '../models/Group';
-import { makeStyles } from '@material-ui/core/styles';
-import CamperTable from '../components/CamperTable';
+import CamperTable from '../src/CamperTable';
+import axios from 'axios';
 
 interface Props {
   group: Group;
 }
 
-const useStyles = makeStyles((theme: any) => ({
-  button: {
-    padding: theme.spacing(1),
-  },
-}));
-
 const GroupEdit = ({ group }: Props) => {
   const router = useRouter();
-  const classes = useStyles();
+  const theme = useTheme();
 
   const { data: campers = [] } = useQuery('campersInGroup', () =>
     fetchCampersInGroup(group.id)
@@ -47,8 +37,13 @@ const GroupEdit = ({ group }: Props) => {
 
   const activeUserClearance = getActiveUserClearance();
 
-  const editGroupMutation = useEditGroup();
-  const deleteGroupMutation = useDeleteGroup();
+  const editGroupMutation = useMutation(
+    async (editedGroup: Group) =>
+      await axios.post(`/api/editGroup`, editedGroup)
+  );
+  const deleteGroupMutation = useMutation(
+    async () => await axios.delete(`/api/deleteGroup?id=${group.id}`)
+  );
 
   useEffect(() => {
     if (editGroupMutation.isSuccess || deleteGroupMutation.isSuccess) {
@@ -116,7 +111,7 @@ const GroupEdit = ({ group }: Props) => {
 
         <Grid item>
           <Button onClick={() => router.push(`/camperAdd?groupId=${group.id}`)}>
-            <Paper className={classes.button}>
+            <Paper sx={{ padding: theme.spacing(1) }}>
               <Container>Add a Camper</Container>
             </Paper>
           </Button>
@@ -124,7 +119,7 @@ const GroupEdit = ({ group }: Props) => {
 
         <Grid item>
           <Button onClick={() => handleDownload({ campers })}>
-            <Paper className={classes.button}>
+            <Paper sx={{ padding: theme.spacing(1) }}>
               <Container>
                 Download an Excel file with all your campers
               </Container>

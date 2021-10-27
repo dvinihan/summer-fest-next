@@ -13,26 +13,20 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from '@material-ui/core';
+  useTheme,
+} from '@mui/material';
 import handleDownload from '../helpers/downloadCSV';
 import { QueryClient, useQuery } from 'react-query';
 import { fetchAllData } from '../queries/allData';
 import { dehydrate } from 'react-query/hydration';
 import Group from '../models/Group';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles((theme: any) => ({
-  button: {
-    padding: theme.spacing(1),
-  },
-}));
 
 const Admin = () => {
   const router = useRouter();
-  const classes = useStyles();
+  const theme = useTheme();
 
-  const allDataQuery = useQuery('allData', () => fetchAllData());
-  const { campers, groups, users } = allDataQuery.data;
+  const { data } = useQuery('allData', fetchAllData);
+  const { campers, groups, users } = data;
 
   // const activeUserClearance = getActiveUserClearance();
   // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
@@ -47,7 +41,7 @@ const Admin = () => {
         direction="column"
         justifyContent="center"
         alignItems="center"
-        spacing={4}
+        spacing={3}
       >
         <Grid item>
           <TableContainer component={Paper}>
@@ -86,40 +80,39 @@ const Admin = () => {
           >
             <Grid item>
               <Button onClick={() => router.push('/groupAdd')}>
-                <Paper className={classes.button}>
+                <Paper sx={{ padding: theme.spacing(1) }}>
                   <Container>Add a Group</Container>
                 </Paper>
               </Button>
             </Grid>
             <Grid item>
               <Button onClick={() => router.push('/userAdd')}>
-                <Paper className={classes.button}>
+                <Paper sx={{ padding: theme.spacing(1) }}>
                   <Container>Add a User</Container>
                 </Paper>
               </Button>
             </Grid>
             <Grid item>
               <Button onClick={() => router.push('/users')}>
-                <Paper className={classes.button}>
+                <Paper sx={{ padding: theme.spacing(1) }}>
                   <Container>View All Users</Container>
                 </Paper>
               </Button>
             </Grid>
           </Grid>
         </Grid>
-        <Grid container justifyContent="center" alignItems="center">
-          <Grid item>
-            <Button
-              onClick={() =>
-                handleDownload({ groups, campers, users, isAdmin: true })
-              }
-              type="button"
-            >
-              <Paper className={classes.button}>
-                <Container>Download All Data</Container>
-              </Paper>
-            </Button>
-          </Grid>
+
+        <Grid item>
+          <Button
+            onClick={() =>
+              handleDownload({ groups, campers, users, isAdmin: true })
+            }
+            type="button"
+          >
+            <Paper sx={{ padding: theme.spacing(1) }}>
+              <Container>Download All Data</Container>
+            </Paper>
+          </Button>
         </Grid>
       </Grid>
     </Container>
@@ -128,7 +121,7 @@ const Admin = () => {
 
 export async function getStaticProps() {
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery('allData', () => fetchAllData());
+  await queryClient.prefetchQuery('allData', fetchAllData);
 
   return {
     props: {

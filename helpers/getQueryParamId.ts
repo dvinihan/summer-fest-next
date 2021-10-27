@@ -1,4 +1,4 @@
-const getQueryParamId = (queryParam?: string | string[]) => {
+export const getQueryParamId = (queryParam?: string | string[]) => {
   if (queryParam === undefined) {
     return undefined;
   }
@@ -6,8 +6,6 @@ const getQueryParamId = (queryParam?: string | string[]) => {
     return parseInt(queryParam);
   }
 
-  // then it must be an array. We only care about one ID
+  // else it must be an array. We only care about one ID
   return parseInt(queryParam[0]);
 };
-
-export default getQueryParamId;

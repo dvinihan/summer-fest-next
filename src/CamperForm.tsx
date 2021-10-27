@@ -11,35 +11,19 @@ import {
   Select,
   TextareaAutosize,
   TextField,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core';
+  useTheme,
+} from '@mui/material';
 import DeleteModal from './DeleteModal';
 import CovidImages from './CovidImages';
-
-const useStyles = makeStyles((theme: any) => ({
-  root: {
-    padding: theme.spacing(2),
-  },
-  smallLabelText: {
-    fontSize: '0.9rem',
-  },
-  button: {
-    padding: theme.spacing(1),
-  },
-  modal: {
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
-  },
-}));
 
 interface Props {
   initialCamper: Camper;
   onSave: (camper: Camper) => void;
-  onDeleteCamper?: (camperId: number) => void;
+  onDeleteCamper?: () => void;
 }
 
 const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
-  const classes = useStyles();
+  const theme = useTheme();
 
   const [camper, setCamper] = useState(initialCamper);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -52,7 +36,7 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
   };
 
   const handleDelete = () => {
-    onDeleteCamper(camper.id);
+    onDeleteCamper();
     setShowDeleteModal(false);
   };
 
@@ -68,7 +52,7 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
         spacing={2}
       >
         <Grid item>
-          <Paper className={classes.root}>
+          <Paper sx={{ padding: theme.spacing(2) }}>
             <Grid container spacing={4}>
               <Grid item>
                 <Grid container spacing={4}>
@@ -154,7 +138,7 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
                   </Grid>
                   <Grid item>
                     <TextField
-                      InputLabelProps={{ className: classes.smallLabelText }}
+                      InputLabelProps={{ sx: { fontSize: '0.9rem' } }}
                       label="Emergency Contact Number"
                       type="tel"
                       onChange={handleChange}
@@ -288,13 +272,13 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
           >
             <Grid item>
               <Button onClick={handleSave}>
-                <Paper className={classes.button}>Save</Paper>
+                <Paper sx={{ padding: theme.spacing(1) }}>Save</Paper>
               </Button>
             </Grid>
             {onDeleteCamper && (
               <Grid item>
                 <Button onClick={() => setShowDeleteModal(true)}>
-                  <Paper className={classes.button}>Delete</Paper>
+                  <Paper sx={{ padding: theme.spacing(1) }}>Delete</Paper>
                 </Button>
               </Grid>
             )}

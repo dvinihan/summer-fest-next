@@ -1,15 +1,4 @@
-import { Button, Grid, Modal, Paper } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles((theme: any) => ({
-  button: {
-    padding: theme.spacing(1),
-  },
-  modal: {
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
-  },
-}));
+import { Button, Grid, Modal, Paper, useTheme } from '@mui/material';
 
 interface Props {
   message: string;
@@ -18,11 +7,11 @@ interface Props {
 }
 
 const DeleteModal = ({ message, onAccept, onDecline }: Props) => {
-  const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <Modal open>
-      <Paper className={classes.modal}>
+      <Paper sx={{ margin: theme.spacing(2), padding: theme.spacing(2) }}>
         <Grid
           container
           direction="column"

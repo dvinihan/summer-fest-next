@@ -1,18 +1,22 @@
 import React, { useEffect } from 'react';
 import { getActiveUserClearance } from '../helpers';
-import GroupForm from '../components/GroupForm';
+import GroupForm from '../src/GroupForm';
 import router from 'next/router';
-import Loading from '../components/Loading';
-import { Container, Grid } from '@material-ui/core';
-import FormError from '../components/FormError';
-import { useAddGroup } from '../queries/groups';
+import Loading from '../src/Loading';
+import { Container, Grid } from '@mui/material';
+import FormError from '../src/FormError';
+import axios from 'axios';
+import { useMutation } from 'react-query';
+import Group from '../models/Group';
 
 const GroupAdd = () => {
-  const addGroupMutation = useAddGroup();
+  const { mutate, data, isSuccess, isLoading, isError } = useMutation(
+    async (newGroup: Group) => await axios.post('/api/addGroup', newGroup)
+  );
 
   useEffect(() => {
-    if (addGroupMutation.isSuccess) {
-      const axiosResponse = addGroupMutation.data;
+    if (isSuccess) {
+      const axiosResponse = data;
       router.push(`groupEdit?id=${axiosResponse.data}`);
     }
   });
@@ -23,8 +27,7 @@ const GroupAdd = () => {
   //   return null;
   // }
 
-  const showLoadingModal =
-    addGroupMutation.isLoading || addGroupMutation.isSuccess;
+  const showLoadingModal = isLoading || isSuccess;
 
   return (
     <Container>
@@ -38,10 +41,10 @@ const GroupAdd = () => {
         spacing={1}
       >
         <Grid item>
-          <GroupForm onSave={addGroupMutation.mutate} />
+          <GroupForm onSave={mutate} />
         </Grid>
 
-        {addGroupMutation.isError && (
+        {isError && (
           <Grid item>
             <FormError />
           </Grid>
