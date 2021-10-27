@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { login } from '../services/user-service';
+// import { login } from '../services/user-service';
 import {
   setActiveGroupId,
   setActiveUserClearance,
   setActiveUserName,
 } from '../helpers';
-import './Login.css';
 
 const Login = () => {
   const router = useRouter();
@@ -17,41 +16,40 @@ const Login = () => {
   const [password, setPassword] = useState();
 
   const handleUsernameChange = (e) => {
-    if (e.key === 'Enter') {
-      login();
-    } else {
-      setUsername(e.target.value);
-    }
+    // if (e.key === 'Enter') {
+    //   login();
+    // } else {
+    //   setUsername(e.target.value);
+    // }
   };
   const handlePasswordChange = (e) => {
-    if (e.key === 'Enter') {
-      login();
-    } else {
-      setPassword(e.target.value);
-    }
+    // if (e.key === 'Enter') {
+    //   login();
+    // } else {
+    //   setPassword(e.target.value);
+    // }
   };
 
   const handleLogin = () => {
-    login(username, password).then((response) => {
-      if (response.error) {
-        setError(response.error.message);
-      } else {
-        setActiveUserClearance(response.user.status);
-        setActiveUserName(response.user.username);
-        setActiveGroupId((response.group && response.group.id) || 0);
-
-        setRedirectUrl(response.redirectUrl);
-      }
-    });
+    // login(username, password).then((response) => {
+    //   if (response.error) {
+    //     setError(response.error.message);
+    //   } else {
+    //     setActiveUserClearance(response.user.status);
+    //     setActiveUserName(response.user.username);
+    //     setActiveGroupId((response.group && response.group.id) || 0);
+    //     setRedirectUrl(response.redirectUrl);
+    //   }
+    // });
   };
 
   const toggleShowPassword = () => {
-    const element = document.getElementById('password-input');
-    if (element.type === 'password') {
-      element.type = 'text';
-    } else {
-      element.type = 'password';
-    }
+    // const element = document.getElementById('password-input');
+    // if (element.type === 'password') {
+    //   element.type = 'text';
+    // } else {
+    //   element.type = 'password';
+    // }
   };
 
   if (redirectUrl) {

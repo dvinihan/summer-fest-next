@@ -22,7 +22,8 @@ const CamperEdit = () => {
   const camper = camperQuery.data[0];
 
   const editCamperMutation = useMutation(
-    async (camper: Camper) => await axios.post('/api/editCamper', camper)
+    async ({ camper }: { camper: Camper }) =>
+      await axios.post('/api/editCamper', camper)
   );
   const deleteCamperMutation = useMutation(
     async () => await axios.delete(`/api/deleteCamper?id=${camper.id}`)

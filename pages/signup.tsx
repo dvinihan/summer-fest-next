@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { signup } from '../services/user-service';
+// import { signup } from '../services/user-service';
 import {
   setActiveGroupId,
   setActiveUserName,
   setActiveUserClearance,
 } from '../helpers';
-import './Signup.css';
 
 const Signup = () => {
   const router = useRouter();
@@ -25,19 +24,18 @@ const Signup = () => {
   };
 
   const handleSignup = () => {
-    signup(username, password).then((response) => {
-      if (response.error) {
-        setError(response.error.message);
-      } else if (response.incomplete) {
-        setIsIncomplete(true);
-      } else {
-        setActiveGroupId(response.group.id);
-        setActiveUserClearance(response.user.status);
-        setActiveUserName(response.user.username);
-
-        setShouldRedirect(true);
-      }
-    });
+    // signup(username, password).then((response) => {
+    //   if (response.error) {
+    //     setError(response.error.message);
+    //   } else if (response.incomplete) {
+    //     setIsIncomplete(true);
+    //   } else {
+    //     setActiveGroupId(response.group.id);
+    //     setActiveUserClearance(response.user.status);
+    //     setActiveUserName(response.user.username);
+    //     setShouldRedirect(true);
+    //   }
+    // });
   };
 
   if (shouldRedirect) {

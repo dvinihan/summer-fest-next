@@ -18,7 +18,7 @@ import CovidImages from './CovidImages';
 
 interface Props {
   initialCamper: Camper;
-  onSave: (camper: Camper) => void;
+  onSave: ({ camper }: { camper: Camper }) => void;
   onDeleteCamper?: () => void;
 }
 
@@ -40,7 +40,8 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
     setShowDeleteModal(false);
   };
 
-  const handleSave = () => onSave({ ...camper, covid_image: covidImage });
+  const handleSave = () =>
+    onSave({ camper: { ...camper, covid_image: covidImage } });
 
   return (
     <Container maxWidth="xl">

@@ -15,10 +15,10 @@ const CamperAdd = () => {
   const groupId = getQueryParamId(router.query.groupId);
 
   const { mutate, isSuccess, isLoading, isError } = useMutation(
-    (camper: Camper) => axios.post('/api/addCamper', camper)
+    ({ camper }: { camper: Camper }) => axios.post('/api/addCamper', camper)
   );
 
-  const handleSave = (camper: Camper) => mutate(camper);
+  const handleSave = ({ camper }: { camper: Camper }) => mutate({ camper });
 
   useEffect(() => {
     if (isSuccess) {
