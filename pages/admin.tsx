@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { getActiveUserClearance } from '../helpers';
+import { getActiveUserClearance } from '../src/helpers';
 import {
   Button,
   Container,
@@ -15,13 +15,16 @@ import {
   TableRow,
   useTheme,
 } from '@mui/material';
-import handleDownload from '../helpers/downloadCSV';
+import handleDownload from '../src/helpers/downloadCSV';
 import { QueryClient, useQuery } from 'react-query';
-import { fetchAllData } from '../queries/allData';
+import { fetchAllData } from '../src/queries/allData';
 import { dehydrate } from 'react-query/hydration';
-import Group from '../models/Group';
+import Group from '../src/models/Group';
+import { useUser } from '@auth0/nextjs-auth0';
 
 const Admin = () => {
+  const { isLoading } = useUser();
+
   const router = useRouter();
   const theme = useTheme();
 

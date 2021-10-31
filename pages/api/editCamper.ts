@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import Camper from '../../models/Camper';
-import connectToDatabase from '../../util/mongodb';
-import uploadToS3 from '../../util/uploadToS3';
+import Camper from '../../src/models/Camper';
+import connectToDatabase from '../../src/util/mongodb';
+import uploadToS3 from '../../src/util/uploadToS3';
 
 interface EditCamperRequest extends NextApiRequest {
   body: Camper;
@@ -20,17 +20,15 @@ export default async (req: EditCamperRequest, res: NextApiResponse) => {
   }
 
   try {
-    await db
-      .collection('campers')
-      .updateOne(
-        { id: req.body.id },
-        {
-          $set: new Camper({
-            ...req.body,
-            covid_image_file_name: covidFileName,
-          }),
-        }
-      );
+    await db.collection('campers').updateOne(
+      { id: req.body.id },
+      {
+        $set: new Camper({
+          ...req.body,
+          covid_image_file_name: covidFileName,
+        }),
+      }
+    );
     console.log('1 document updated');
   } catch (error) {
     throw error;

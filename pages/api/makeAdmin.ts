@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import connectToDatabase from '../../util/mongodb';
+import connectToDatabase from '../../src/util/mongodb';
 
 interface Request extends NextApiRequest {
   body: { userId: number };

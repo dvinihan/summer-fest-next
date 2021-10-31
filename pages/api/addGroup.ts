@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import Group from '../../models/Group';
-import connectToDatabase from '../../util/mongodb';
+import Group from '../../src/models/Group';
+import connectToDatabase from '../../src/util/mongodb';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const db = await connectToDatabase();

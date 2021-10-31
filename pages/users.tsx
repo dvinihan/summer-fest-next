@@ -1,11 +1,11 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { getActiveUserClearance, getActiveUserName } from '../helpers';
+import { getActiveUserClearance, getActiveUserName } from '../src/helpers';
 import { useMutation, useQuery } from 'react-query';
-import { fetchAllData } from '../queries/allData';
+import { fetchAllData } from '../src/queries/allData';
 import axios from 'axios';
-import Group from '../models/Group';
-import User from '../models/User';
+import Group from '../src/models/Group';
+import User from '../src/models/User';
 import {
   Button,
   Paper,

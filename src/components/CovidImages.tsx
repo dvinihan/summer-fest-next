@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Grid, InputLabel } from '@mui/material';
 import ImageViewer from 'react-simple-image-viewer';
 import axios from 'axios';
-import { downloadCovidImage } from '../queries/images';
+import { downloadCovidImage } from './queries/images';
 import { useMutation } from 'react-query';
 
 interface Props {

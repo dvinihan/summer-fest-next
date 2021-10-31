@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getQueryParamId } from '../../helpers/getQueryParamId';
-import connectToDatabase from '../../util/mongodb';
+import { getQueryParamId } from '../../src/helpers/getQueryParamId';
+import connectToDatabase from '../../src/util/mongodb';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const db = await connectToDatabase();

@@ -7,9 +7,9 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { getActiveUserClearance } from '../helpers';
-import Group from '../models/Group';
-import User from '../models/User';
+import { getActiveUserClearance } from './helpers';
+import Group from './models/Group';
+import User from './models/User';
 import DeleteModal from './DeleteModal';
 
 interface Props {

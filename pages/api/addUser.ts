@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import User from '../../models/User';
-import connectToDatabase from '../../util/mongodb';
+import User from '../../src/models/User';
+import connectToDatabase from '../../src/util/mongodb';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const db = await connectToDatabase();

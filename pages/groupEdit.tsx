@@ -1,20 +1,20 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getActiveUserClearance } from '../helpers';
+import { getActiveUserClearance } from '../src/helpers';
 import GroupForm from '../src/GroupForm';
 import { Button, Container, Grid, Paper, useTheme } from '@mui/material';
 import FormError from '../src/FormError';
 import { NextPageContext } from 'next';
-import { getQueryParamId } from '../helpers/getQueryParamId';
-import { fetchGroupsById } from '../queries/groups';
-import handleDownload from '../helpers/downloadCSV';
+import { getQueryParamId } from '../src/helpers/getQueryParamId';
+import { fetchGroupsById } from '../src/queries/groups';
+import handleDownload from '../src/helpers/downloadCSV';
 import Loading from '../src/Loading';
 import { QueryClient, useMutation, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
-import { fetchCampersInGroup } from '../queries/campers';
-import { fetchGroupUsers } from '../queries/users';
+import { fetchCampersInGroup } from '../src/queries/campers';
+import { fetchGroupUsers } from '../src/queries/users';
 import PageError from '../src/PageError';
-import Group from '../models/Group';
+import Group from '../src/models/Group';
 import CamperTable from '../src/CamperTable';
 import axios from 'axios';
 

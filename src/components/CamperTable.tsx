@@ -10,10 +10,10 @@ import {
   TableRow,
 } from '@mui/material';
 import { useMutation } from 'react-query';
-import { getActiveUserClearance } from '../helpers';
-import downloadImage from '../helpers/downloadImage';
-import Camper from '../models/Camper';
-import { downloadCovidImage } from '../queries/images';
+import { getActiveUserClearance } from './helpers';
+import downloadImage from './helpers/downloadImage';
+import Camper from './models/Camper';
+import { downloadCovidImage } from './queries/images';
 
 interface Props {
   campers: Camper[];

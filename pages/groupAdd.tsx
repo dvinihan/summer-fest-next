@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { getActiveUserClearance } from '../helpers';
+import { getActiveUserClearance } from '../src/helpers';
 import GroupForm from '../src/GroupForm';
 import router from 'next/router';
 import Loading from '../src/Loading';
@@ -7,7 +7,7 @@ import { Container, Grid } from '@mui/material';
 import FormError from '../src/FormError';
 import axios from 'axios';
 import { useMutation } from 'react-query';
-import Group from '../models/Group';
+import Group from '../src/models/Group';
 
 const GroupAdd = () => {
   const { mutate, data, isSuccess, isLoading, isError } = useMutation(
