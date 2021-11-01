@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import Group from '../../src/models/Group';
+import Group from '../../src/types/Group';
 import connectToDatabase from '../../src/util/mongodb';
 
 interface EditGroupRequest extends NextApiRequest {

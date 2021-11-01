@@ -1,31 +1,36 @@
 import React, { useEffect } from 'react';
-import { getActiveUserClearance } from '../src/helpers';
-import GroupForm from '../src/GroupForm';
+import GroupForm from '../src/components/GroupForm';
 import router from 'next/router';
-import Loading from '../src/Loading';
+import Loading from '../src/components/Loading';
 import { Container, Grid } from '@mui/material';
-import FormError from '../src/FormError';
+import FormError from '../src/components/FormError';
 import axios from 'axios';
 import { useMutation } from 'react-query';
-import Group from '../src/models/Group';
+import Group from '../src/types/Group';
+import { getIsAdmin } from '../src/hooks/useAdmin';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { PageHeader } from '../src/components/PageHeader';
+import { GetServerSidePropsContext } from 'next';
+import AdminError from '../src/components/AdminError';
 
-const GroupAdd = () => {
+type Props = {
+  isAdmin: boolean;
+};
+
+const GroupAdd = ({ isAdmin }: Props) => {
+  if (!isAdmin) {
+    return <AdminError />;
+  }
+
   const { mutate, data, isSuccess, isLoading, isError } = useMutation(
     async (newGroup: Group) => await axios.post('/api/addGroup', newGroup)
   );
 
   useEffect(() => {
     if (isSuccess) {
-      const axiosResponse = data;
-      router.push(`groupEdit?id=${axiosResponse.data}`);
+      router.push(`groupEdit?id=${data.data}`);
     }
   });
-
-  // const activeUserClearance = getActiveUserClearance();
-  // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
-  //   router.replace('/');
-  //   return null;
-  // }
 
   const showLoadingModal = isLoading || isSuccess;
 
@@ -33,6 +38,7 @@ const GroupAdd = () => {
     <Container>
       {showLoadingModal && <Loading />}
 
+      <PageHeader />
       <Grid
         container
         direction="column"
@@ -40,6 +46,9 @@ const GroupAdd = () => {
         alignItems="center"
         spacing={1}
       >
+        <Grid item>
+          <div style={{ height: '80px' }}></div>
+        </Grid>
         <Grid item>
           <GroupForm onSave={mutate} />
         </Grid>
@@ -53,5 +62,16 @@ const GroupAdd = () => {
     </Container>
   );
 };
+
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context: GetServerSidePropsContext) => {
+    const isAdmin = getIsAdmin(context);
+    return {
+      props: {
+        isAdmin,
+      },
+    };
+  },
+});
 
 export default GroupAdd;

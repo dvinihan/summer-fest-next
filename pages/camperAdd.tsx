@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Camper from '../src/models/Camper';
+import Camper from '../src/types/Camper';
 import { useRouter } from 'next/router';
 import { useMutation } from 'react-query';
 import axios from 'axios';

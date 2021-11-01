@@ -1,22 +1,23 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
-import { getActiveUserClearance } from '../src/helpers';
-import GroupForm from '../src/GroupForm';
+import GroupForm from '../src/components/GroupForm';
 import { Button, Container, Grid, Paper, useTheme } from '@mui/material';
-import FormError from '../src/FormError';
-import { NextPageContext } from 'next';
+import FormError from '../src/components/FormError';
+import { GetServerSidePropsContext } from 'next';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import { fetchGroupsById } from '../src/queries/groups';
 import handleDownload from '../src/helpers/downloadCSV';
-import Loading from '../src/Loading';
+import Loading from '../src/components/Loading';
 import { QueryClient, useMutation, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import { fetchCampersInGroup } from '../src/queries/campers';
-import { fetchGroupUsers } from '../src/queries/users';
-import PageError from '../src/PageError';
-import Group from '../src/models/Group';
-import CamperTable from '../src/CamperTable';
+import PageError from '../src/components/PageError';
+import Group from '../src/types/Group';
+import CamperTable from '../src/components/CamperTable';
 import axios from 'axios';
+import { useAppContext } from '../src/context/AppContext';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { PageHeader } from '../src/components/PageHeader';
 
 interface Props {
   group: Group;
@@ -26,61 +27,38 @@ const GroupEdit = ({ group }: Props) => {
   const router = useRouter();
   const theme = useTheme();
 
+  const { setToastMessage } = useAppContext();
+
   const { data: campers = [] } = useQuery('campersInGroup', () =>
     fetchCampersInGroup(group.id)
   );
-  const { data: users = [] } = useQuery('groupUsers', () =>
-    fetchGroupUsers(group.id)
-  );
-  // there should only be one user with this groupId
-  const groupUser = users[0];
-
-  const activeUserClearance = getActiveUserClearance();
 
   const editGroupMutation = useMutation(
-    async (editedGroup: Group) =>
-      await axios.post(`/api/editGroup`, editedGroup)
+    (editedGroup: Group) => axios.post(`/api/editGroup`, editedGroup),
+    {
+      onSuccess: () => {
+        setToastMessage('Group successfully saved.');
+      },
+    }
   );
   const deleteGroupMutation = useMutation(
-    async () => await axios.delete(`/api/deleteGroup?id=${group.id}`)
+    () => axios.delete(`/api/deleteGroup?id=${group.id}`),
+    {
+      onSuccess: () => {
+        router.push('/admin');
+        setToastMessage(`Group ${group.group_name} successfully deleted.`);
+      },
+    }
   );
 
-  useEffect(() => {
-    if (editGroupMutation.isSuccess || deleteGroupMutation.isSuccess) {
-      router.push(`/admin`);
-    }
-  });
-
-  //   if (shouldRedirect) {
-  //     return (
-  //       <Redirect
-  //         to={{
-  //           pathname: '/admin',
-  //         }}
-  //       />
-  //     );
-  //   }
-
-  //   if (!activeUserClearance) {
-  //     return (
-  //       <Redirect
-  //         to={{
-  //           pathname: '/',
-  //         }}
-  //       />
-  //     );
-  //   }
-
   const showLoadingModal =
-    editGroupMutation.isLoading ||
-    deleteGroupMutation.isLoading ||
-    editGroupMutation.isSuccess ||
-    deleteGroupMutation.isSuccess;
+    editGroupMutation.isLoading || deleteGroupMutation.isLoading;
 
   return (
     <Container>
       {showLoadingModal && <Loading />}
 
+      <PageHeader />
       <Grid
         container
         direction="column"
@@ -89,11 +67,13 @@ const GroupEdit = ({ group }: Props) => {
         spacing={1}
       >
         <Grid item>
+          <div style={{ height: '80px' }}></div>
+        </Grid>
+        <Grid item>
           <GroupForm
             initialGroup={group}
             onDeleteGroup={deleteGroupMutation.mutate}
             onSave={editGroupMutation.mutate}
-            groupUser={groupUser}
           />
         </Grid>
 
@@ -153,26 +133,25 @@ const GroupEditContainer = () => {
   return <GroupEdit group={group} />;
 };
 
-export const getServerSideProps = async (context: NextPageContext) => {
-  const queryClient = new QueryClient();
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context: GetServerSidePropsContext) => {
+    const queryClient = new QueryClient();
 
-  const groupId = getQueryParamId(context.query.id);
+    const groupId = getQueryParamId(context.query.id);
 
-  if (groupId) {
-    await queryClient.prefetchQuery('groups', () => fetchGroupsById(groupId));
-    await queryClient.prefetchQuery('campersInGroup', () =>
-      fetchCampersInGroup(groupId)
-    );
-    await queryClient.prefetchQuery('groupUsers', () =>
-      fetchGroupUsers(groupId)
-    );
-  }
+    if (groupId) {
+      await queryClient.prefetchQuery('groups', () => fetchGroupsById(groupId));
+      await queryClient.prefetchQuery('campersInGroup', () =>
+        fetchCampersInGroup(groupId)
+      );
+    }
 
-  return {
-    props: {
-      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
-    },
-  };
-};
+    return {
+      props: {
+        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+      },
+    };
+  },
+});
 
 export default GroupEditContainer;

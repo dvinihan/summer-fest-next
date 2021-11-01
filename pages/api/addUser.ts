@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import User from '../../src/models/User';
+import User from '../../src/types/User';
 import connectToDatabase from '../../src/util/mongodb';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {

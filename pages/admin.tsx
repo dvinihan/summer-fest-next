@@ -1,6 +1,5 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { getActiveUserClearance } from '../src/helpers';
 import {
   Button,
   Container,
@@ -19,11 +18,21 @@ import handleDownload from '../src/helpers/downloadCSV';
 import { QueryClient, useQuery } from 'react-query';
 import { fetchAllData } from '../src/queries/allData';
 import { dehydrate } from 'react-query/hydration';
-import Group from '../src/models/Group';
-import { useUser } from '@auth0/nextjs-auth0';
+import Group from '../src/types/Group';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { getIsAdmin } from '../src/hooks/useAdmin';
+import { GetServerSidePropsContext } from 'next';
+import { PageHeader } from '../src/components/PageHeader';
+import AdminError from '../src/components/AdminError';
 
-const Admin = () => {
-  const { isLoading } = useUser();
+type Props = {
+  isAdmin: boolean;
+};
+
+const Admin = ({ isAdmin }: Props) => {
+  if (!isAdmin) {
+    return <AdminError />;
+  }
 
   const router = useRouter();
   const theme = useTheme();
@@ -31,14 +40,9 @@ const Admin = () => {
   const { data } = useQuery('allData', fetchAllData);
   const { campers, groups, users } = data;
 
-  // const activeUserClearance = getActiveUserClearance();
-  // if (typeof window !== 'undefined' && activeUserClearance !== 'admin') {
-  //   router.replace('/');
-  //   return null;
-  // }
-
   return (
     <Container maxWidth="xl">
+      <PageHeader />
       <Grid
         container
         direction="column"
@@ -46,6 +50,9 @@ const Admin = () => {
         alignItems="center"
         spacing={3}
       >
+        <Grid item>
+          <div style={{ height: '60px' }}></div>
+        </Grid>
         <Grid item>
           <TableContainer component={Paper}>
             <Table>
@@ -122,15 +129,28 @@ const Admin = () => {
   );
 };
 
-export async function getStaticProps() {
-  const queryClient = new QueryClient();
-  await queryClient.prefetchQuery('allData', fetchAllData);
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context: GetServerSidePropsContext) => {
+    const isAdmin = getIsAdmin(context);
 
-  return {
-    props: {
-      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
-    },
-  };
-}
+    if (!isAdmin) {
+      return {
+        props: {
+          isAdmin,
+        },
+      };
+    }
+
+    const queryClient = new QueryClient();
+    await queryClient.prefetchQuery('allData', fetchAllData);
+
+    return {
+      props: {
+        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+        isAdmin,
+      },
+    };
+  },
+});
 
 export default Admin;

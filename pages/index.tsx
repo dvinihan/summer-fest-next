@@ -1,49 +1,41 @@
 import React, { useEffect } from 'react';
 import { Button, Container, Grid } from '@mui/material';
 import { useRouter } from 'next/router';
-// import { getActiveUserName } from '../helpers/index';
-import { useUser } from '@auth0/nextjs-auth0';
+import { useAdmin } from '../src/hooks/useAdmin';
+import { PageHeader } from '../src/components/PageHeader';
 
 const Home = () => {
   const router = useRouter();
 
-  const { user } = useUser();
-  const isAdmin = user['https://summer-fest.com/isAdmin'];
-
-  console.log(user);
+  const { user, isAdmin } = useAdmin();
 
   useEffect(() => {
-    // if (user) {
-    // }
+    if (user) {
+      const redirectPath = isAdmin ? '/admin' : '/groupEdit';
+      router.push(redirectPath);
+    }
   });
 
-  // const activeUserName = getActiveUserName();
-
-  // if (activeUserName) {
-  //   return null;
-  // }
-
   const handleLogin = () => {
-    // loginWithRedirect();
     router.push('/api/auth/login');
-  };
-
-  const handleLogout = () => {
-    // logout();
-    router.push('/api/auth/logout');
   };
 
   return (
     <Container maxWidth="xl">
-      <Grid container justifyContent="center" alignItems="center" spacing={3}>
+      <PageHeader />
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={3}
+      >
+        <Grid item>
+          <div style={{ height: '60px' }}></div>
+        </Grid>
         <Grid item>
           <Button variant="contained" onClick={handleLogin}>
             Log In
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button variant="contained" onClick={handleLogout}>
-            Log Out
           </Button>
         </Grid>
       </Grid>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getActiveUserClearance } from '../helpers';
-import Camper from '../models/Camper';
+import Camper from '../types/Camper';
 import {
   Button,
   Container,

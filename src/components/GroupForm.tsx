@@ -7,29 +7,21 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { getActiveUserClearance } from './helpers';
-import Group from './models/Group';
-import User from './models/User';
+import { useAdmin } from '../hooks/useAdmin';
+import Group from '../types/Group';
 import DeleteModal from './DeleteModal';
 
 interface Props {
   initialGroup?: Group;
   onDeleteGroup?: () => void;
   onSave: (group: Group) => void;
-  groupUser?: User;
 }
 
-export const GroupForm = ({
-  initialGroup,
-  onDeleteGroup,
-  onSave,
-  groupUser,
-}: Props) => {
+export const GroupForm = ({ initialGroup, onDeleteGroup, onSave }: Props) => {
   const theme = useTheme();
   const [group, setGroup] = useState(initialGroup ?? new Group());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const activeUserClearance = getActiveUserClearance();
+  const isAdmin = useAdmin();
 
   const handleChange = (e) => {
     setGroup({ ...group, [e.target.name]: e.target.value });
@@ -82,8 +74,7 @@ export const GroupForm = ({
                   Save
                 </Button>
               </Grid>
-              {onDeleteGroup && (
-                // && activeUserClearance === 'admin'
+              {onDeleteGroup && isAdmin && (
                 <Grid item>
                   <Button
                     variant="contained"
@@ -99,11 +90,7 @@ export const GroupForm = ({
 
         {showDeleteModal && (
           <DeleteModal
-            message={`Are you sure you want to PERMANENTLY delete ${
-              initialGroup.group_name
-            } and all its campers${
-              groupUser ? `, along with the user ${groupUser.username}` : ''
-            }?`}
+            message={`Are you sure you want to PERMANENTLY delete ${initialGroup.group_name} and all its campers?`}
             onAccept={handleDelete}
             onDecline={() => setShowDeleteModal(false)}
           />

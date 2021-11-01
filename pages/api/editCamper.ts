@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import Camper from '../../src/models/Camper';
+import Camper from '../../src/types/Camper';
 import connectToDatabase from '../../src/util/mongodb';
 import uploadToS3 from '../../src/util/uploadToS3';
 

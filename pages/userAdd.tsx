@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getActiveUserClearance } from '../src/helpers';
-import User from '../src/models/User';
+import User from '../src/types/User';
 import { useMutation } from 'react-query';
 import axios from 'axios';
 import {

@@ -1,11 +1,10 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { getActiveUserClearance, getActiveUserName } from '../src/helpers';
 import { useMutation, useQuery } from 'react-query';
 import { fetchAllData } from '../src/queries/allData';
 import axios from 'axios';
-import Group from '../src/models/Group';
-import User from '../src/models/User';
+import Group from '../src/types/Group';
+import User from '../src/types/User';
 import {
   Button,
   Paper,
@@ -18,8 +17,6 @@ import {
 } from '@mui/material';
 
 const Users = () => {
-  const router = useRouter();
-
   const { data, isError } = useQuery('allData', fetchAllData);
 
   const makeAdminMutation = useMutation(
@@ -40,13 +37,6 @@ const Users = () => {
   if (!data?.users || !data?.groups) {
     return null;
   }
-
-  const activeUserClearance = getActiveUserClearance();
-  const activeUserName = getActiveUserName();
-
-  // if (activeUserClearance !== 'admin') {
-  //   router.push('/');
-  // }
 
   return (
     <>

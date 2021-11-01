@@ -2,7 +2,7 @@ import { Db } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
 import uploadToS3 from '../../src/util/uploadToS3';
-import Camper from '../../src/models/Camper';
+import Camper from '../../src/types/Camper';
 import connectToDatabase from '../../src/util/mongodb';
 
 interface AddCamperRequest extends NextApiRequest {

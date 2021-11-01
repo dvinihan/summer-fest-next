@@ -1,6 +1,6 @@
-import Camper from '../models/Camper';
-import Group from '../models/Group';
-import User from '../models/User';
+import Camper from '../types/Camper';
+import Group from '../types/Group';
+import User from '../types/User';
 
 const convertArrayOfObjectsToCSV = (data, isAdmin, groups?) => {
   if (data && data.length > 0) {

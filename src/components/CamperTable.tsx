@@ -10,23 +10,23 @@ import {
   TableRow,
 } from '@mui/material';
 import { useMutation } from 'react-query';
-import { getActiveUserClearance } from './helpers';
-import downloadImage from './helpers/downloadImage';
-import Camper from './models/Camper';
-import { downloadCovidImage } from './queries/images';
+import downloadImage from '../helpers/downloadImage';
+import Camper from '../types/Camper';
+import { downloadCovidImage } from '../queries/images';
+import { useAdmin } from '../hooks/useAdmin';
 
 interface Props {
   campers: Camper[];
 }
 
 const CamperTable = ({ campers }: Props) => {
+  const isAdmin = useAdmin();
+
   const { mutate } = useMutation(downloadCovidImage, {
     onSuccess: (data, { covidImageFileName }) => {
       downloadImage(covidImageFileName, data);
     },
   });
-
-  const activeUserClearance = getActiveUserClearance();
 
   const handleDownloadCovidImage = (covidImageFileName: string) => {
     mutate({ covidImageFileName });
@@ -51,9 +51,7 @@ const CamperTable = ({ campers }: Props) => {
             <TableCell>Online or Paper Registration</TableCell>
             <TableCell>Waiver Signed Status</TableCell>
             <TableCell>Waiver Signed By</TableCell>
-            {activeUserClearance === 'admin' && (
-              <TableCell>Room Assignment</TableCell>
-            )}
+            {isAdmin && <TableCell>Room Assignment</TableCell>}
             <TableCell>Is Adult Leader</TableCell>
             <TableCell>Student Leadership Track</TableCell>
             <TableCell>Camp Attending</TableCell>
@@ -82,9 +80,7 @@ const CamperTable = ({ campers }: Props) => {
               <TableCell>{camper.registration}</TableCell>
               <TableCell>{camper.signed_status}</TableCell>
               <TableCell>{camper.signed_by}</TableCell>
-              {activeUserClearance === 'admin' && (
-                <TableCell>{camper.room}</TableCell>
-              )}
+              {isAdmin && <TableCell>{camper.room}</TableCell>}
               <TableCell>{camper.adult_leader}</TableCell>
               <TableCell>{camper.student_leadership_track}</TableCell>
               <TableCell>{camper.camp_attending}</TableCell>
