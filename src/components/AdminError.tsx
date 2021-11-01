@@ -1,4 +1,4 @@
-import { Container, Typography } from '@mui/material';
+import { Container, Paper, Typography } from '@mui/material';
 import { PageHeader } from './PageHeader';
 
 const AdminError = () => {
@@ -6,7 +6,9 @@ const AdminError = () => {
     <Container maxWidth="xl">
       <PageHeader />
       <div style={{ height: '80px' }}></div>
-      <Typography>Sorry, you must be an admin to view this page.</Typography>
+      <Paper sx={{ padding: '20px' }}>
+        <Typography>Sorry, you must be an admin to view this page.</Typography>
+      </Paper>
     </Container>
   );
 };

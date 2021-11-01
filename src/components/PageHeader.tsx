@@ -11,17 +11,19 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useAdmin } from '../hooks/useAdmin';
 
 export const PageHeader = () => {
   const router = useRouter();
+  const { isAdmin } = useAdmin();
 
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
 
   const openNavDrawer = () => setIsNavDrawerOpen(true);
   const closeNavDrawer = () => setIsNavDrawerOpen(false);
 
-  const handleLogout = () => {
-    router.push('/api/auth/logout');
+  const handleNav = (path: string) => {
+    router.push(path);
   };
 
   return (
@@ -37,7 +39,12 @@ export const PageHeader = () => {
 
       <Drawer anchor="left" open={isNavDrawerOpen} onClose={closeNavDrawer}>
         <List>
-          <ListItemButton onClick={handleLogout}>
+          {isAdmin && (
+            <ListItemButton onClick={() => handleNav('/admin')}>
+              <ListItemText primary="Admin" />
+            </ListItemButton>
+          )}
+          <ListItemButton onClick={() => handleNav('/api/auth/logout')}>
             <ListItemText primary="Logout" />
           </ListItemButton>
         </List>

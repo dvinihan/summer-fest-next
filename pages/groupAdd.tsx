@@ -27,8 +27,8 @@ const GroupAdd = ({ isAdmin }: Props) => {
   );
 
   useEffect(() => {
-    if (isSuccess) {
-      router.push(`groupEdit?id=${data.data}`);
+    if (data) {
+      router.push(`groupEdit?id=${data.data.id}`);
     }
   });
 

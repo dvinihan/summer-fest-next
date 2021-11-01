@@ -19,15 +19,16 @@ import { useAppContext } from '../src/context/AppContext';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
 
-interface Props {
-  group: Group;
-}
-
-const GroupEdit = ({ group }: Props) => {
+const GroupEdit = () => {
   const router = useRouter();
   const theme = useTheme();
+  const groupId = getQueryParamId(router.query.id);
 
   const { setToastMessage } = useAppContext();
+
+  const { data: groups = [] } = useQuery('groups', () =>
+    groupId ? fetchGroupsById(groupId) : undefined
+  );
 
   const { data: campers = [] } = useQuery('campersInGroup', () =>
     fetchCampersInGroup(group.id)
@@ -53,6 +54,13 @@ const GroupEdit = ({ group }: Props) => {
 
   const showLoadingModal =
     editGroupMutation.isLoading || deleteGroupMutation.isLoading;
+
+  // there should only be one group with this id
+  const group = groups[0];
+
+  if (!groupId || !group) {
+    return <PageError />;
+  }
 
   return (
     <Container>
@@ -111,28 +119,6 @@ const GroupEdit = ({ group }: Props) => {
   );
 };
 
-const GroupEditContainer = () => {
-  const router = useRouter();
-  const groupId = getQueryParamId(router.query.id);
-
-  if (!groupId) {
-    return <PageError />;
-  }
-
-  const { data: groups = [] } = useQuery('groups', () =>
-    fetchGroupsById(groupId)
-  );
-
-  // there should only be one group with this id
-  const group = groups[0];
-
-  if (!group) {
-    return <PageError />;
-  }
-
-  return <GroupEdit group={group} />;
-};
-
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const queryClient = new QueryClient();
@@ -154,4 +140,4 @@ export const getServerSideProps = withPageAuthRequired({
   },
 });
 
-export default GroupEditContainer;
+export default GroupEdit;

@@ -1,5 +1,6 @@
 import '../src/styles/globals.css';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 import { Hydrate } from 'react-query/hydration';
 import Head from 'next/head';
 import theme from '../src/styles/theme';
@@ -37,6 +38,7 @@ export default function MyApp({ Component, pageProps }) {
                   onClose={handleCloseToast}
                   message={toastMessage}
                 />
+                <ReactQueryDevtools />
               </AppContext.Provider>
             </ThemeProvider>
           </Hydrate>
