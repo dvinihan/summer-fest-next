@@ -5,13 +5,13 @@ import React, { useEffect } from 'react';
 import { QueryClient, useMutation, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import CamperForm from '../src/components/CamperForm';
-import FormError from '../src/FormError';
-import Loading from '../src/Loading';
-import PageError from '../src/PageError';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import { fetchCamperById } from '../src/queries/campers';
 import axios from 'axios';
 import Camper from '../src/types/Camper';
+import PageError from '../src/components/PageError';
+import Loading from '../src/components/Loading';
+import FormError from '../src/components/FormError';
 
 const CamperEdit = () => {
   const router = useRouter();

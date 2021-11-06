@@ -16,20 +16,23 @@ import {
 } from '@mui/material';
 import handleDownload from '../src/helpers/downloadCSV';
 import { QueryClient, useQuery } from 'react-query';
-import { fetchAllData } from '../src/queries/allData';
 import { dehydrate } from 'react-query/hydration';
 import Group from '../src/types/Group';
-import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { getAccessToken, withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { getIsAdmin } from '../src/hooks/useAdmin';
 import { GetServerSidePropsContext } from 'next';
 import { PageHeader } from '../src/components/PageHeader';
 import AdminError from '../src/components/AdminError';
+import { fetchCampersInGroup } from '../src/queries/campers';
+import { fetchGroupsById } from '../src/queries/groups';
+import { fetchAllUsers } from '../src/queries/users';
 
 type Props = {
   isAdmin: boolean;
+  accessToken?: string;
 };
 
-const Admin = ({ isAdmin }: Props) => {
+const Admin = ({ isAdmin, accessToken }: Props) => {
   if (!isAdmin) {
     return <AdminError />;
   }
@@ -37,8 +40,9 @@ const Admin = ({ isAdmin }: Props) => {
   const router = useRouter();
   const theme = useTheme();
 
-  const { data } = useQuery('allData', fetchAllData);
-  const { campers, groups, users } = data;
+  const { data: campers } = useQuery('campers', () => fetchCampersInGroup());
+  const { data: groups } = useQuery('groups', () => fetchGroupsById());
+  const { data: users } = useQuery('users', () => fetchAllUsers(accessToken));
 
   return (
     <Container maxWidth="xl">
@@ -132,22 +136,27 @@ const Admin = ({ isAdmin }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const isAdmin = getIsAdmin(context);
+    const { accessToken } = await getAccessToken(context.req, context.res);
 
     if (!isAdmin) {
       return {
         props: {
           isAdmin,
+          accessToken: undefined,
         },
       };
     }
 
     const queryClient = new QueryClient();
-    await queryClient.prefetchQuery('allData', fetchAllData);
+    await queryClient.prefetchQuery('campers', () => fetchCampersInGroup());
+    await queryClient.prefetchQuery('groups', () => fetchGroupsById());
+    await queryClient.prefetchQuery('users', () => fetchAllUsers(accessToken));
 
     return {
       props: {
         dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
         isAdmin,
+        accessToken,
       },
     };
   },
