@@ -3,11 +3,11 @@ import Camper from '../src/types/Camper';
 import { useRouter } from 'next/router';
 import { useMutation } from 'react-query';
 import axios from 'axios';
-import Loading from '../src/Loading';
-import PageError from '../src/PageError';
+import Loading from '../src/components/Loading';
+import PageError from '../src/components/PageError';
 import CamperForm from '../src/components/CamperForm';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
-import FormError from '../src/FormError';
+import FormError from '../src/components/FormError';
 import { Grid } from '@mui/material';
 
 const CamperAdd = () => {
