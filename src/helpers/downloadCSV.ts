@@ -1,3 +1,4 @@
+import { fetchAllUsers } from '../queries/users';
 import Camper from '../types/Camper';
 import Group from '../types/Group';
 import User from '../types/User';
@@ -42,17 +43,23 @@ const convertArrayOfObjectsToCSV = (data, isAdmin, groups?) => {
   return null;
 };
 
-const downloadCSV = ({
-  users,
+export const downloadCSV = async ({
   groups,
   campers,
   isAdmin = false,
 }: {
-  users?: User[];
   groups?: Group[];
   campers?: Camper[];
   isAdmin?: boolean;
 }) => {
+  let users: User[] | undefined;
+  if (isAdmin) {
+    try {
+      const { data } = await fetchAllUsers();
+      users = data;
+    } catch (error) {}
+  }
+
   const csvFile =
     convertArrayOfObjectsToCSV(users, isAdmin) +
     convertArrayOfObjectsToCSV(groups, isAdmin) +
@@ -72,5 +79,3 @@ const downloadCSV = ({
     document.body.removeChild(element);
   }
 };
-
-export default downloadCSV;

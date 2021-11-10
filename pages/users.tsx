@@ -27,10 +27,9 @@ import { PageHeader } from '../src/components/PageHeader';
 
 type Props = {
   isAdmin: boolean;
-  accessToken: string;
 };
 
-const Users = ({ isAdmin, accessToken }: Props) => {
+const Users = ({ isAdmin }: Props) => {
   if (!isAdmin) {
     return <AdminError />;
   }
@@ -39,7 +38,7 @@ const Users = ({ isAdmin, accessToken }: Props) => {
     fetchGroupsById()
   );
   const { data: users = [], isError: usersError } = useQuery('users', () =>
-    fetchAllUsers(accessToken)
+    fetchAllUsers()
   );
 
   const makeAdminMutation = useMutation(
@@ -119,18 +118,13 @@ const Users = ({ isAdmin, accessToken }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const isAdmin = getIsAdmin(context);
-    const { accessToken } = await getAccessToken(context.req, context.res);
-
-    const session = getSession(context.req, context.res);
-    console.log(session);
 
     const queryClient = new QueryClient();
     await queryClient.prefetchQuery('groups', () => fetchGroupsById());
-    await queryClient.prefetchQuery('users', () => fetchAllUsers(accessToken));
+    await queryClient.prefetchQuery('users', () => fetchAllUsers());
 
     return {
       props: {
-        accessToken,
         isAdmin,
         dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
       },

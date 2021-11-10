@@ -1,4 +1,4 @@
-import { getSession, UserProfile, useUser } from '@auth0/nextjs-auth0';
+import { getSession, useUser } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
 import { IS_ADMIN_KEY } from '../constants';
 

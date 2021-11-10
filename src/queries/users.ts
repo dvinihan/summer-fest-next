@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-export const fetchAllUsers = async (accessToken: string) => {
+export const fetchAllUsers = async () => {
   const { data } = await axios.get(
-    `${process.env.NEXT_PUBLIC_AUTH0_DOMAIN}/api/v2/users`,
-    { headers: { authorization: `Bearer ${accessToken}` } }
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users`
   );
-  return data;
+  return data.users;
 };

@@ -6,7 +6,7 @@ import FormError from '../src/components/FormError';
 import { GetServerSidePropsContext } from 'next';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import { fetchGroupsById } from '../src/queries/groups';
-import handleDownload from '../src/helpers/downloadCSV';
+import { downloadCSV } from '../src/helpers/downloadCSV';
 import Loading from '../src/components/Loading';
 import { QueryClient, useMutation, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
@@ -106,7 +106,7 @@ const GroupEdit = () => {
         </Grid>
 
         <Grid item>
-          <Button onClick={() => handleDownload({ campers })}>
+          <Button onClick={() => downloadCSV({ campers })}>
             <Paper sx={{ padding: theme.spacing(1) }}>
               <Container>
                 Download an Excel file with all your campers

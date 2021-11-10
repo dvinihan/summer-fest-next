@@ -14,7 +14,7 @@ import {
   TableRow,
   useTheme,
 } from '@mui/material';
-import handleDownload from '../src/helpers/downloadCSV';
+import { downloadCSV } from '../src/helpers/downloadCSV';
 import { QueryClient, useQuery } from 'react-query';
 import { dehydrate } from 'react-query/hydration';
 import Group from '../src/types/Group';
@@ -29,10 +29,9 @@ import { fetchAllUsers } from '../src/queries/users';
 
 type Props = {
   isAdmin: boolean;
-  accessToken?: string;
 };
 
-const Admin = ({ isAdmin, accessToken }: Props) => {
+const Admin = ({ isAdmin }: Props) => {
   if (!isAdmin) {
     return <AdminError />;
   }
@@ -42,7 +41,6 @@ const Admin = ({ isAdmin, accessToken }: Props) => {
 
   const { data: campers } = useQuery('campers', () => fetchCampersInGroup());
   const { data: groups } = useQuery('groups', () => fetchGroupsById());
-  const { data: users } = useQuery('users', () => fetchAllUsers(accessToken));
 
   return (
     <Container maxWidth="xl">
@@ -118,9 +116,7 @@ const Admin = ({ isAdmin, accessToken }: Props) => {
 
         <Grid item>
           <Button
-            onClick={() =>
-              handleDownload({ groups, campers, users, isAdmin: true })
-            }
+            onClick={() => downloadCSV({ groups, campers, isAdmin: true })}
             type="button"
           >
             <Paper sx={{ padding: theme.spacing(1) }}>
@@ -136,13 +132,14 @@ const Admin = ({ isAdmin, accessToken }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const isAdmin = getIsAdmin(context);
+
     const { accessToken } = await getAccessToken(context.req, context.res);
+    console.log('---AT:', accessToken);
 
     if (!isAdmin) {
       return {
         props: {
           isAdmin,
-          accessToken: undefined,
         },
       };
     }
@@ -150,13 +147,11 @@ export const getServerSideProps = withPageAuthRequired({
     const queryClient = new QueryClient();
     await queryClient.prefetchQuery('campers', () => fetchCampersInGroup());
     await queryClient.prefetchQuery('groups', () => fetchGroupsById());
-    await queryClient.prefetchQuery('users', () => fetchAllUsers(accessToken));
 
     return {
       props: {
         dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
         isAdmin,
-        accessToken,
       },
     };
   },
