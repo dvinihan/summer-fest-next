@@ -133,9 +133,6 @@ export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const isAdmin = getIsAdmin(context);
 
-    const { accessToken } = await getAccessToken(context.req, context.res);
-    console.log('---AT:', accessToken);
-
     if (!isAdmin) {
       return {
         props: {
