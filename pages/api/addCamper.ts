@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import uploadToS3 from '../../src/util/uploadToS3';
 import Camper from '../../src/types/Camper';
 import connectToDatabase from '../../src/util/mongodb';
+import { withApiAuthRequired } from '@auth0/nextjs-auth0';
 
 interface AddCamperRequest extends NextApiRequest {
   body: Camper;
@@ -44,7 +45,7 @@ const checkEmail = async (db: Db, camper: Camper) => {
   //     to: camper.parent_email,
   //     subject: 'Your Summer Festival Registration Waiver',
   //     text: '',
-  //     html: `<p>Please sign the Summer Festival Waiver Form, <a href='https://summer-fest-registration.herokuapp.com/waiver?id=${id}'>linked here.</a></p><p>Thank you!</p><p>Tony Ducklow<br />Summer Festival Camp Director</p>`,
+  //     html: `<p>Please sign the Summer Festival Waiver Form, <a href='${PROD_BASE_URL}/waiver?id=${id}'>linked here.</a></p><p>Thank you!</p><p>Tony Ducklow<br />Summer Festival Camp Director</p>`,
   //   });
   // } catch (error) {
   //   throw error;
@@ -60,36 +61,38 @@ const checkEmail = async (db: Db, camper: Camper) => {
   }
 };
 
-export default async (req: AddCamperRequest, res: NextApiResponse) => {
-  const db = await connectToDatabase();
+export default withApiAuthRequired(
+  async (req: AddCamperRequest, res: NextApiResponse) => {
+    const db = await connectToDatabase();
 
-  let covidFileName = '';
-  if (req.body.covid_image) {
-    covidFileName = `covid_image_${req.body.first_name}_${
-      req.body.last_name
-    }_${Math.floor(Math.random() * 10000000000)}.jpg`;
+    let covidFileName = '';
+    if (req.body.covid_image) {
+      covidFileName = `covid_image_${req.body.first_name}_${
+        req.body.last_name
+      }_${Math.floor(Math.random() * 10000000000)}.jpg`;
 
-    uploadToS3(req.body.covid_image, covidFileName);
+      uploadToS3(req.body.covid_image, covidFileName);
+    }
+
+    try {
+      const { insertedId } = await db
+        .collection('campers')
+        .insertOne(
+          new Camper({ ...req.body, covid_image_file_name: covidFileName })
+        );
+
+      console.log('1 document inserted');
+
+      const newCamperDoc = await db
+        .collection('campers')
+        .findOne({ _id: insertedId });
+
+      await checkEmail(db, JSON.parse(JSON.stringify(newCamperDoc)));
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+
+    res.json({});
   }
-
-  try {
-    const { insertedId } = await db
-      .collection('campers')
-      .insertOne(
-        new Camper({ ...req.body, covid_image_file_name: covidFileName })
-      );
-
-    console.log('1 document inserted');
-
-    const newCamperDoc = await db
-      .collection('campers')
-      .findOne({ _id: insertedId });
-
-    await checkEmail(db, JSON.parse(JSON.stringify(newCamperDoc)));
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-
-  res.json({});
-};
+);

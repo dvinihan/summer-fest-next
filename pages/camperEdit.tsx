@@ -1,9 +1,8 @@
 import { Grid } from '@mui/material';
-import { NextPageContext } from 'next';
+import { GetServerSidePropsContext } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
-import { QueryClient, useMutation, useQuery } from 'react-query';
-import { dehydrate } from 'react-query/hydration';
+import { useMutation } from 'react-query';
 import CamperForm from '../src/components/CamperForm';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import { fetchCamperById } from '../src/queries/campers';
@@ -12,14 +11,21 @@ import Camper from '../src/types/Camper';
 import PageError from '../src/components/PageError';
 import Loading from '../src/components/Loading';
 import FormError from '../src/components/FormError';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { getIsAdmin } from '../src/helpers';
+import { fetchUserRoles } from '../src/queries/users';
 
-const CamperEdit = () => {
+type Props = {
+  isAdmin: boolean;
+  camper?: Camper;
+};
+
+const CamperEdit = ({ isAdmin, camper }: Props) => {
+  if (!camper) {
+    return <PageError isAdmin={isAdmin} />;
+  }
+
   const router = useRouter();
-
-  const camperId = getQueryParamId(router.query.id);
-  const camperQuery = useQuery('camperById', () => fetchCamperById(camperId));
-  // there should only be one camper with this id
-  const camper = camperQuery.data[0];
 
   const editCamperMutation = useMutation(
     async ({ camper }: { camper: Camper }) =>
@@ -35,35 +41,13 @@ const CamperEdit = () => {
     }
   });
 
-  //   if (shouldRedirect) {
-  //     return (
-  //       <Redirect
-  //         to={{
-  //           pathname: '/admin',
-  //         }}
-  //       />
-  //     );
-  //   }
-
-  //   if (!activeUserClearance) {
-  //     return (
-  //       <Redirect
-  //         to={{
-  //           pathname: '/',
-  //         }}
-  //       />
-  //     );
-  //   }
-
   const showLoadingModal =
     editCamperMutation.isLoading ||
     deleteCamperMutation.isLoading ||
     editCamperMutation.isSuccess ||
     deleteCamperMutation.isSuccess;
 
-  return !camper ? (
-    <PageError />
-  ) : (
+  return (
     <>
       {showLoadingModal && <Loading />}
 
@@ -91,22 +75,29 @@ const CamperEdit = () => {
   );
 };
 
-export const getServerSideProps = async (context: NextPageContext) => {
-  const queryClient = new QueryClient();
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context: GetServerSidePropsContext) => {
+    const sessionCookie = context.req.headers.cookie;
+    const userRoles = await fetchUserRoles({
+      sessionCookie,
+    });
+    const isAdmin = getIsAdmin(userRoles);
 
-  const camperId = getQueryParamId(context.query.id);
+    const camperId = getQueryParamId(context.query.id);
+    if (!camperId) {
+      return {
+        props: {},
+      };
+    }
 
-  if (camperId) {
-    await queryClient.prefetchQuery('camperById', () =>
-      fetchCamperById(camperId)
-    );
+    const camper = await fetchCamperById({ sessionCookie, camperId });
 
     return {
       props: {
-        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+        camper,
       },
     };
-  }
-};
+  },
+});
 
 export default CamperEdit;

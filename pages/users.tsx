@@ -1,5 +1,5 @@
 import React from 'react';
-import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 import axios from 'axios';
 import Group from '../src/types/Group';
 import User from '../src/types/User';
@@ -13,52 +13,43 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import {
-  getAccessToken,
-  getSession,
-  withPageAuthRequired,
-} from '@auth0/nextjs-auth0';
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
-import { fetchAllUsers } from '../src/queries/users';
-import { getIsAdmin } from '../src/hooks/useAdmin';
+import { fetchAllUsers, fetchUserRoles } from '../src/queries/users';
 import AdminError from '../src/components/AdminError';
 import { fetchGroupsById } from '../src/queries/groups';
 import { PageHeader } from '../src/components/PageHeader';
+import { getIsAdmin } from '../src/helpers';
 
 type Props = {
   isAdmin: boolean;
+  groups: Group[];
+  users: User[];
 };
 
-const Users = ({ isAdmin }: Props) => {
+const Users = ({ isAdmin, groups, users }: Props) => {
   if (!isAdmin) {
     return <AdminError />;
   }
 
-  const { data: groups = [], isError: groupsError } = useQuery('groups', () =>
-    fetchGroupsById()
-  );
-  const { data: users = [], isError: usersError } = useQuery('users', () =>
-    fetchAllUsers()
-  );
-
   const makeAdminMutation = useMutation(
-    async ({ userId }: { userId: number }) =>
+    async ({ userId }: { userId: string }) =>
       await axios.post(`/api/makeAdmin`, { userId })
   );
 
   const deleteUserMutation = useMutation(
-    async ({ userId }: { userId: number }) =>
+    async ({ userId }: { userId: string }) =>
       await axios.delete(`/api/deleteUser?id=${userId}`)
   );
 
   const getGroupName = (groups: Group[], user: User) => {
-    const group = groups.find((g) => g.id === user.group_id);
-    return group && group.group_name;
+    const group = groups.find((g) => g.id === user.user_metadata.group_id);
+    return group?.group_name;
   };
 
   return (
     <>
-      <PageHeader />
+      <PageHeader isAdmin={isAdmin} />
       <TableContainer component={Paper} sx={{ marginTop: '80px' }}>
         <Table>
           <TableHead>
@@ -71,62 +62,76 @@ const Users = ({ isAdmin }: Props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user: User) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.username}</TableCell>
-                <TableCell>{getGroupName(groups, user)}</TableCell>
-                <TableCell>{user.status}</TableCell>
-                <TableCell>
-                  {user.status?.toLowerCase() === 'leader' && (
-                    <Button
-                      className="table-name"
-                      onClick={() =>
-                        makeAdminMutation.mutate({ userId: user.id })
-                      }
-                      type="button"
-                    >
-                      MAKE ADMIN (cannot be undone)
-                    </Button>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {user.status?.toLowerCase() === 'leader' && (
-                    <Button
-                      className="table-name"
-                      onClick={() =>
-                        deleteUserMutation.mutate({ userId: user.id })
-                      }
-                      type="button"
-                    >
-                      DELETE USER (cannot be undone)
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+            {users.map((user: User) => {
+              const isCurrentUserAdmin = () => {
+                // TODO
+              };
+
+              return (
+                <TableRow key={user.user_id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{getGroupName(groups, user)}</TableCell>
+                  <TableCell>
+                    {isCurrentUserAdmin ? 'Admin' : 'Leader'}
+                  </TableCell>
+                  <TableCell>
+                    {!isCurrentUserAdmin && (
+                      <Button
+                        className="table-name"
+                        onClick={() =>
+                          makeAdminMutation.mutate({ userId: user.user_id })
+                        }
+                        type="button"
+                      >
+                        MAKE ADMIN (cannot be undone)
+                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {!isCurrentUserAdmin && (
+                      <Button
+                        className="table-name"
+                        onClick={() =>
+                          deleteUserMutation.mutate({ userId: user.user_id })
+                        }
+                        type="button"
+                      >
+                        DELETE USER (cannot be undone)
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
-
-      {(groupsError || usersError) && (
-        <div>There&apos;s been an error. Please refresh and try again.</div>
-      )}
     </>
   );
 };
 
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
-    const isAdmin = getIsAdmin(context);
+    const sessionCookie = context.req.headers.cookie;
 
-    const queryClient = new QueryClient();
-    await queryClient.prefetchQuery('groups', () => fetchGroupsById());
-    await queryClient.prefetchQuery('users', () => fetchAllUsers());
+    const [groups, users, userRoles] = await Promise.all([
+      fetchGroupsById({
+        sessionCookie,
+      }),
+      fetchAllUsers({
+        sessionCookie,
+      }),
+      fetchUserRoles({
+        sessionCookie,
+      }),
+    ]);
+    const isAdmin = getIsAdmin(userRoles);
 
     return {
       props: {
         isAdmin,
-        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+        groups,
+        users,
       },
     };
   },

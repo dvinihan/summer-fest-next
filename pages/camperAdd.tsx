@@ -9,6 +9,7 @@ import CamperForm from '../src/components/CamperForm';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import FormError from '../src/components/FormError';
 import { Grid } from '@mui/material';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 
 const CamperAdd = () => {
   const router = useRouter();
@@ -55,4 +56,4 @@ const CamperAdd = () => {
   );
 };
 
-export default CamperAdd;
+export default withPageAuthRequired(CamperAdd);

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { getActiveUserClearance } from '../helpers';
 import Camper from '../types/Camper';
 import {
   Button,
@@ -17,19 +16,23 @@ import DeleteModal from './DeleteModal';
 import CovidImages from './CovidImages';
 
 interface Props {
+  isAdmin: boolean;
   initialCamper: Camper;
   onSave: ({ camper }: { camper: Camper }) => void;
   onDeleteCamper?: () => void;
 }
 
-const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
+const CamperForm = ({
+  isAdmin,
+  initialCamper,
+  onSave,
+  onDeleteCamper,
+}: Props) => {
   const theme = useTheme();
 
   const [camper, setCamper] = useState(initialCamper);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [covidImage, setCovidImage] = useState('');
-
-  const activeUserClearance = getActiveUserClearance();
 
   const handleChange = (e) => {
     setCamper({ ...camper, [e.target.name]: e.target.value });
@@ -188,7 +191,7 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
                       <MenuItem value="Signed">Signed</MenuItem>
                     </Select>
                   </Grid>
-                  {activeUserClearance === 'admin' && (
+                  {isAdmin && (
                     <Grid item>
                       <TextField
                         label="Room Assignment"

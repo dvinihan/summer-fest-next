@@ -15,23 +15,24 @@ import {
   useTheme,
 } from '@mui/material';
 import { downloadCSV } from '../src/helpers/downloadCSV';
-import { QueryClient, useQuery } from 'react-query';
-import { dehydrate } from 'react-query/hydration';
 import Group from '../src/types/Group';
-import { getAccessToken, withPageAuthRequired } from '@auth0/nextjs-auth0';
-import { getIsAdmin } from '../src/hooks/useAdmin';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
 import { PageHeader } from '../src/components/PageHeader';
 import AdminError from '../src/components/AdminError';
 import { fetchCampersInGroup } from '../src/queries/campers';
 import { fetchGroupsById } from '../src/queries/groups';
-import { fetchAllUsers } from '../src/queries/users';
+import Camper from '../src/types/Camper';
+import { getIsAdmin } from '../src/helpers';
+import { fetchUserRoles } from '../src/queries/users';
 
 type Props = {
   isAdmin: boolean;
+  campers: Camper[];
+  groups: Group[];
 };
 
-const Admin = ({ isAdmin }: Props) => {
+const Admin = ({ isAdmin, campers = [], groups = [] }: Props) => {
   if (!isAdmin) {
     return <AdminError />;
   }
@@ -39,12 +40,9 @@ const Admin = ({ isAdmin }: Props) => {
   const router = useRouter();
   const theme = useTheme();
 
-  const { data: campers } = useQuery('campers', () => fetchCampersInGroup());
-  const { data: groups } = useQuery('groups', () => fetchGroupsById());
-
   return (
     <Container maxWidth="xl">
-      <PageHeader />
+      <PageHeader isAdmin={isAdmin} />
       <Grid
         container
         direction="column"
@@ -131,7 +129,11 @@ const Admin = ({ isAdmin }: Props) => {
 
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
-    const isAdmin = getIsAdmin(context);
+    const sessionCookie = context.req.headers.cookie;
+    const userRoles = await fetchUserRoles({
+      sessionCookie,
+    });
+    const isAdmin = getIsAdmin(userRoles);
 
     if (!isAdmin) {
       return {
@@ -141,14 +143,20 @@ export const getServerSideProps = withPageAuthRequired({
       };
     }
 
-    const queryClient = new QueryClient();
-    await queryClient.prefetchQuery('campers', () => fetchCampersInGroup());
-    await queryClient.prefetchQuery('groups', () => fetchGroupsById());
+    const [campers, groups] = await Promise.all([
+      fetchCampersInGroup({
+        sessionCookie,
+      }),
+      fetchGroupsById({
+        sessionCookie,
+      }),
+    ]);
 
     return {
       props: {
-        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
         isAdmin,
+        campers,
+        groups,
       },
     };
   },

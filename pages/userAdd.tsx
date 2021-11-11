@@ -14,6 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useRouter } from 'next/router';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 
 const UserAdd = () => {
   const router = useRouter();
@@ -108,4 +109,4 @@ const UserAdd = () => {
   );
 };
 
-export default UserAdd;
+export default withPageAuthRequired(UserAdd);

@@ -13,15 +13,13 @@ import { useMutation } from 'react-query';
 import downloadImage from '../helpers/downloadImage';
 import Camper from '../types/Camper';
 import { downloadCovidImage } from '../queries/images';
-import { useAdmin } from '../hooks/useAdmin';
 
 interface Props {
+  isAdmin: boolean;
   campers: Camper[];
 }
 
-const CamperTable = ({ campers }: Props) => {
-  const isAdmin = useAdmin();
-
+const CamperTable = ({ isAdmin, campers }: Props) => {
   const { mutate } = useMutation(downloadCovidImage, {
     onSuccess: (data, { covidImageFileName }) => {
       downloadImage(covidImageFileName, data);

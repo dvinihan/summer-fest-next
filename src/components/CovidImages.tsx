@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button, Grid, InputLabel } from '@mui/material';
 import ImageViewer from 'react-simple-image-viewer';
-import axios from 'axios';
-import { downloadCovidImage } from './queries/images';
 import { useMutation } from 'react-query';
+import { downloadCovidImage } from '../queries/images';
 
 interface Props {
   oldImageFileName: string;
@@ -29,7 +28,7 @@ const CovidImages = ({
   // on first load, download file if it already exists
   useEffect(() => {
     if (oldImageFileName) {
-      mutate(oldImageFileName);
+      mutate({ covidImageFileName: oldImageFileName });
     }
   }, []);
   useEffect(() => {

@@ -1,1 +1,1 @@
-export const IS_ADMIN_KEY = 'https://summer-fest.com/isAdmin';
+export const PROD_BASE_URL = 'https://summer-fest-registration.herokuapp.com';

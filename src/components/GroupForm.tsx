@@ -7,21 +7,25 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { useAdmin } from '../hooks/useAdmin';
 import Group from '../types/Group';
 import DeleteModal from './DeleteModal';
 
 interface Props {
+  isAdmin: boolean;
   initialGroup?: Group;
   onDeleteGroup?: () => void;
   onSave: (group: Group) => void;
 }
 
-export const GroupForm = ({ initialGroup, onDeleteGroup, onSave }: Props) => {
+export const GroupForm = ({
+  isAdmin,
+  initialGroup,
+  onDeleteGroup,
+  onSave,
+}: Props) => {
   const theme = useTheme();
   const [group, setGroup] = useState(initialGroup ?? new Group());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const isAdmin = useAdmin();
 
   const handleChange = (e) => {
     setGroup({ ...group, [e.target.name]: e.target.value });

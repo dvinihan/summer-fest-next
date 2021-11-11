@@ -7,11 +7,12 @@ import FormError from '../src/components/FormError';
 import axios from 'axios';
 import { useMutation } from 'react-query';
 import Group from '../src/types/Group';
-import { getIsAdmin } from '../src/hooks/useAdmin';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
 import AdminError from '../src/components/AdminError';
+import { fetchUserRoles } from '../src/queries/users';
+import { getIsAdmin } from '../src/helpers';
 
 type Props = {
   isAdmin: boolean;
@@ -22,15 +23,21 @@ const GroupAdd = ({ isAdmin }: Props) => {
     return <AdminError />;
   }
 
-  const { mutate, data, isSuccess, isLoading, isError } = useMutation(
+  const {
+    mutate,
+    data: addGroupAxiosResponse,
+    isSuccess,
+    isLoading,
+    isError,
+  } = useMutation(
     async (newGroup: Group) => await axios.post('/api/addGroup', newGroup)
   );
 
   useEffect(() => {
-    if (data) {
-      router.push(`groupEdit?id=${data.data.id}`);
+    if (addGroupAxiosResponse?.data?.id) {
+      router.push(`groupEdit?id=${addGroupAxiosResponse.data.id}`);
     }
-  });
+  }, [addGroupAxiosResponse.data.id]);
 
   const showLoadingModal = isLoading || isSuccess;
 
@@ -38,7 +45,7 @@ const GroupAdd = ({ isAdmin }: Props) => {
     <Container>
       {showLoadingModal && <Loading />}
 
-      <PageHeader />
+      <PageHeader isAdmin={isAdmin} />
       <Grid
         container
         direction="column"
@@ -50,7 +57,7 @@ const GroupAdd = ({ isAdmin }: Props) => {
           <div style={{ height: '80px' }}></div>
         </Grid>
         <Grid item>
-          <GroupForm onSave={mutate} />
+          <GroupForm isAdmin={isAdmin} onSave={mutate} />
         </Grid>
 
         {isError && (
@@ -65,7 +72,12 @@ const GroupAdd = ({ isAdmin }: Props) => {
 
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
-    const isAdmin = getIsAdmin(context);
+    const sessionCookie = context.req.headers.cookie;
+    const userRoles = await fetchUserRoles({
+      sessionCookie,
+    });
+    const isAdmin = getIsAdmin(userRoles);
+
     return {
       props: {
         isAdmin,

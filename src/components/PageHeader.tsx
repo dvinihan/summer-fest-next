@@ -11,11 +11,13 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useAdmin } from '../hooks/useAdmin';
 
-export const PageHeader = () => {
+type Props = {
+  isAdmin: boolean;
+};
+
+export const PageHeader = ({ isAdmin }: Props) => {
   const router = useRouter();
-  const { isAdmin } = useAdmin();
 
   const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
 
