@@ -2,13 +2,9 @@ import { Container, Paper, Typography } from '@mui/material';
 import { PROD_BASE_URL } from '../constants';
 import { PageHeader } from './PageHeader';
 
-type Props = {
-  isAdmin: boolean;
-};
-
-const PageError = ({ isAdmin }: Props) => (
+const PageError = () => (
   <Container maxWidth="xl">
-    <PageHeader isAdmin={isAdmin} />
+    <PageHeader />
     <div style={{ height: '80px' }}></div>
     <Paper sx={{ padding: '20px' }}>
       <Typography>

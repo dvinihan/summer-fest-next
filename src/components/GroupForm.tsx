@@ -1,3 +1,4 @@
+import { useUser } from '@auth0/nextjs-auth0';
 import {
   Button,
   Container,
@@ -7,25 +8,22 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { getIsAdminFromUser } from '../helpers';
 import Group from '../types/Group';
 import DeleteModal from './DeleteModal';
 
 interface Props {
-  isAdmin: boolean;
   initialGroup?: Group;
   onDeleteGroup?: () => void;
   onSave: (group: Group) => void;
 }
 
-export const GroupForm = ({
-  isAdmin,
-  initialGroup,
-  onDeleteGroup,
-  onSave,
-}: Props) => {
+export const GroupForm = ({ initialGroup, onDeleteGroup, onSave }: Props) => {
   const theme = useTheme();
   const [group, setGroup] = useState(initialGroup ?? new Group());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { user } = useUser();
+  const isAdmin = getIsAdminFromUser(user);
 
   const handleChange = (e) => {
     setGroup({ ...group, [e.target.name]: e.target.value });

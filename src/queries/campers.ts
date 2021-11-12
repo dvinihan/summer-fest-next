@@ -1,29 +1,23 @@
 import axios from 'axios';
 
-export const fetchCampersInGroup = async ({
-  sessionCookie,
-  groupId,
-}: {
-  sessionCookie: string;
-  groupId?: number;
-}) => {
+export const fetchCampersInGroup = async (
+  groupId: number,
+  sessionCookie?: string
+) => {
   const { data } = await axios.get(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/campers?groupId=${groupId}`,
-    { headers: { Cookie: sessionCookie } }
+    sessionCookie ? { headers: { Cookie: sessionCookie } } : undefined
   );
   return data;
 };
 
-export const fetchCamperById = async ({
-  sessionCookie,
-  camperId,
-}: {
-  sessionCookie: string;
-  camperId: number;
-}) => {
+export const fetchCamperById = async (
+  camperId: number,
+  sessionCookie?: string
+) => {
   const { data: camperList } = await axios.get(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/campers?camperId=${camperId}`,
-    { headers: { Cookie: sessionCookie } }
+    sessionCookie ? { headers: { Cookie: sessionCookie } } : undefined
   );
   return camperList[0];
 };

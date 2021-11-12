@@ -5,10 +5,10 @@ import { Button, Container, Grid, Paper, useTheme } from '@mui/material';
 import FormError from '../src/components/FormError';
 import { GetServerSidePropsContext } from 'next';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
-import { fetchGroupsById } from '../src/queries/groups';
+import { fetchGroupById } from '../src/queries/groups';
 import { downloadCSV } from '../src/helpers/downloadCSV';
 import Loading from '../src/components/Loading';
-import { useMutation } from 'react-query';
+import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
 import { fetchCampersInGroup } from '../src/queries/campers';
 import PageError from '../src/components/PageError';
 import Group from '../src/types/Group';
@@ -17,22 +17,23 @@ import axios from 'axios';
 import { useAppContext } from '../src/context/AppContext';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
-import { fetchUserRoles } from '../src/queries/users';
-import { getIsAdmin } from '../src/helpers';
-import Camper from '../src/types/Camper';
 
 type Props = {
-  isAdmin: boolean;
-  campers: Camper[];
-  groups: Group[];
+  groupId?: number;
 };
 
-const GroupEdit = ({ isAdmin, campers, groups }: Props) => {
+const GroupEdit = ({ groupId }: Props) => {
   const router = useRouter();
   const theme = useTheme();
-  const groupId = getQueryParamId(router.query.id);
 
   const { setToastMessage } = useAppContext();
+
+  const { data: campers = [] } = useQuery(`campers - group ${groupId}`, () =>
+    fetchCampersInGroup(groupId)
+  );
+  const { data: group } = useQuery(`group ${groupId}`, () =>
+    fetchGroupById(groupId)
+  );
 
   const editGroupMutation = useMutation(
     (editedGroup: Group) => axios.post(`/api/editGroup`, editedGroup),
@@ -55,18 +56,15 @@ const GroupEdit = ({ isAdmin, campers, groups }: Props) => {
   const showLoadingModal =
     editGroupMutation.isLoading || deleteGroupMutation.isLoading;
 
-  // there should only be one group with this id
-  const group = groups[0];
-
   if (!groupId || !group) {
-    return <PageError isAdmin={isAdmin} />;
+    return <PageError />;
   }
 
   return (
     <Container>
       {showLoadingModal && <Loading />}
 
-      <PageHeader isAdmin={isAdmin} />
+      <PageHeader />
       <Grid
         container
         direction="column"
@@ -79,7 +77,6 @@ const GroupEdit = ({ isAdmin, campers, groups }: Props) => {
         </Grid>
         <Grid item>
           <GroupForm
-            isAdmin={isAdmin}
             initialGroup={group}
             onDeleteGroup={deleteGroupMutation.mutate}
             onSave={editGroupMutation.mutate}
@@ -96,7 +93,7 @@ const GroupEdit = ({ isAdmin, campers, groups }: Props) => {
           <h1>Campers</h1>
         </Grid>
 
-        <CamperTable isAdmin={isAdmin} campers={campers} />
+        <CamperTable campers={campers} />
 
         <Grid item>
           <Button onClick={() => router.push(`/camperAdd?groupId=${group.id}`)}>
@@ -123,31 +120,22 @@ const GroupEdit = ({ isAdmin, campers, groups }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const sessionCookie = context.req.headers.cookie;
-    const userRoles = await fetchUserRoles({
-      sessionCookie,
-    });
-    const isAdmin = getIsAdmin(userRoles);
-
     const groupId = getQueryParamId(context.query.id);
 
-    if (!groupId) {
-      return {
-        props: {
-          isAdmin,
-        },
-      };
+    const queryClient = new QueryClient();
+    if (groupId) {
+      await queryClient.prefetchQuery(`campers - group ${groupId}`, () =>
+        fetchCampersInGroup(groupId, sessionCookie)
+      );
+      await queryClient.prefetchQuery(`group ${groupId}`, () =>
+        fetchGroupById(groupId, sessionCookie)
+      );
     }
-
-    const [campers, groups] = await Promise.all([
-      fetchCampersInGroup({ sessionCookie, groupId }),
-      fetchGroupsById({ sessionCookie, groupId }),
-    ]);
 
     return {
       props: {
-        isAdmin,
-        campers,
-        groups,
+        dehydratedState: dehydrate(queryClient),
+        groupId,
       },
     };
   },

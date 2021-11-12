@@ -14,21 +14,19 @@ import {
 } from '@mui/material';
 import DeleteModal from './DeleteModal';
 import CovidImages from './CovidImages';
+import { useUser } from '@auth0/nextjs-auth0';
+import { getIsAdminFromUser } from '../helpers';
 
 interface Props {
-  isAdmin: boolean;
   initialCamper: Camper;
   onSave: ({ camper }: { camper: Camper }) => void;
   onDeleteCamper?: () => void;
 }
 
-const CamperForm = ({
-  isAdmin,
-  initialCamper,
-  onSave,
-  onDeleteCamper,
-}: Props) => {
+const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
   const theme = useTheme();
+  const { user } = useUser();
+  const isAdmin = getIsAdminFromUser(user);
 
   const [camper, setCamper] = useState(initialCamper);
   const [showDeleteModal, setShowDeleteModal] = useState(false);

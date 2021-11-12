@@ -10,19 +10,10 @@ import Group from '../src/types/Group';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
-import AdminError from '../src/components/AdminError';
-import { fetchUserRoles } from '../src/queries/users';
-import { getIsAdmin } from '../src/helpers';
+import { getIsAdminFromContext } from '../src/helpers';
+import { withAdmin } from '../src/components/withAdmin';
 
-type Props = {
-  isAdmin: boolean;
-};
-
-const GroupAdd = ({ isAdmin }: Props) => {
-  if (!isAdmin) {
-    return <AdminError />;
-  }
-
+const GroupAdd = () => {
   const {
     mutate,
     data: addGroupAxiosResponse,
@@ -45,7 +36,7 @@ const GroupAdd = ({ isAdmin }: Props) => {
     <Container>
       {showLoadingModal && <Loading />}
 
-      <PageHeader isAdmin={isAdmin} />
+      <PageHeader />
       <Grid
         container
         direction="column"
@@ -57,7 +48,7 @@ const GroupAdd = ({ isAdmin }: Props) => {
           <div style={{ height: '80px' }}></div>
         </Grid>
         <Grid item>
-          <GroupForm isAdmin={isAdmin} onSave={mutate} />
+          <GroupForm onSave={mutate} />
         </Grid>
 
         {isError && (
@@ -72,18 +63,12 @@ const GroupAdd = ({ isAdmin }: Props) => {
 
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
-    const sessionCookie = context.req.headers.cookie;
-    const userRoles = await fetchUserRoles({
-      sessionCookie,
-    });
-    const isAdmin = getIsAdmin(userRoles);
-
     return {
       props: {
-        isAdmin,
+        isAdmin: getIsAdminFromContext(context),
       },
     };
   },
 });
 
-export default GroupAdd;
+export default withAdmin(GroupAdd);

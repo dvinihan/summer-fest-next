@@ -1,9 +1,13 @@
+import { fetchCampersInGroup } from '../queries/campers';
 import { fetchAllUsers } from '../queries/users';
 import Camper from '../types/Camper';
 import Group from '../types/Group';
-import User from '../types/User';
 
-const convertArrayOfObjectsToCSV = (data, isAdmin, groups?) => {
+const convertArrayOfObjectsToCSV = (
+  data: any[],
+  isAdmin: boolean,
+  groups?: Group[]
+) => {
   if (data && data.length > 0) {
     let keys = Object.keys(data[0]);
     keys = keys.filter((key) => key !== 'password');
@@ -52,18 +56,17 @@ export const downloadCSV = async ({
   campers?: Camper[];
   isAdmin?: boolean;
 }) => {
-  let users: User[] | undefined;
+  let csvFile;
   if (isAdmin) {
-    try {
-      const { data } = await fetchAllUsers();
-      users = data;
-    } catch (error) {}
+    const { data: users } = await fetchAllUsers();
+    const { data: campers } = await fetchCampersInGroup();
+    csvFile =
+      convertArrayOfObjectsToCSV(users, isAdmin) +
+      convertArrayOfObjectsToCSV(groups, isAdmin) +
+      convertArrayOfObjectsToCSV(campers, isAdmin, groups);
+  } else {
+    csvFile = convertArrayOfObjectsToCSV(campers, isAdmin);
   }
-
-  const csvFile =
-    convertArrayOfObjectsToCSV(users, isAdmin) +
-    convertArrayOfObjectsToCSV(groups, isAdmin) +
-    convertArrayOfObjectsToCSV(campers, isAdmin, groups);
 
   const element = document.createElement('a');
   element.setAttribute(

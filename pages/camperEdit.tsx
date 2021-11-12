@@ -12,17 +12,14 @@ import PageError from '../src/components/PageError';
 import Loading from '../src/components/Loading';
 import FormError from '../src/components/FormError';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
-import { getIsAdmin } from '../src/helpers';
-import { fetchUserRoles } from '../src/queries/users';
 
 type Props = {
-  isAdmin: boolean;
   camper?: Camper;
 };
 
-const CamperEdit = ({ isAdmin, camper }: Props) => {
+const CamperEdit = ({ camper }: Props) => {
   if (!camper) {
-    return <PageError isAdmin={isAdmin} />;
+    return <PageError />;
   }
 
   const router = useRouter();
@@ -78,10 +75,6 @@ const CamperEdit = ({ isAdmin, camper }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const sessionCookie = context.req.headers.cookie;
-    const userRoles = await fetchUserRoles({
-      sessionCookie,
-    });
-    const isAdmin = getIsAdmin(userRoles);
 
     const camperId = getQueryParamId(context.query.id);
     if (!camperId) {
@@ -90,7 +83,7 @@ export const getServerSideProps = withPageAuthRequired({
       };
     }
 
-    const camper = await fetchCamperById({ sessionCookie, camperId });
+    const camper = await fetchCamperById(camperId, sessionCookie);
 
     return {
       props: {

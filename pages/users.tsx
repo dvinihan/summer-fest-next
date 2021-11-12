@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMutation } from 'react-query';
+import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
 import axios from 'axios';
 import Group from '../src/types/Group';
 import User from '../src/types/User';
@@ -13,24 +13,17 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
-import { fetchAllUsers, fetchUserRoles } from '../src/queries/users';
-import AdminError from '../src/components/AdminError';
-import { fetchGroupsById } from '../src/queries/groups';
+import { fetchAllUsers } from '../src/queries/users';
+import { fetchAllGroups } from '../src/queries/groups';
 import { PageHeader } from '../src/components/PageHeader';
-import { getIsAdmin } from '../src/helpers';
+import { getIsAdminFromContext } from '../src/helpers';
+import { withAdmin } from '../src/components/withAdmin';
 
-type Props = {
-  isAdmin: boolean;
-  groups: Group[];
-  users: User[];
-};
-
-const Users = ({ isAdmin, groups, users }: Props) => {
-  if (!isAdmin) {
-    return <AdminError />;
-  }
+const Users = () => {
+  const { data: groups = [] } = useQuery('allGroups', () => fetchAllGroups());
+  const { data: users = [] } = useQuery('allUsers', () => fetchAllUsers());
 
   const makeAdminMutation = useMutation(
     async ({ userId }: { userId: string }) =>
@@ -49,7 +42,7 @@ const Users = ({ isAdmin, groups, users }: Props) => {
 
   return (
     <>
-      <PageHeader isAdmin={isAdmin} />
+      <PageHeader />
       <TableContainer component={Paper} sx={{ marginTop: '80px' }}>
         <Table>
           <TableHead>
@@ -113,28 +106,23 @@ const Users = ({ isAdmin, groups, users }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const sessionCookie = context.req.headers.cookie;
+    const isAdmin = getIsAdminFromContext(context);
 
-    const [groups, users, userRoles] = await Promise.all([
-      fetchGroupsById({
-        sessionCookie,
-      }),
-      fetchAllUsers({
-        sessionCookie,
-      }),
-      fetchUserRoles({
-        sessionCookie,
-      }),
-    ]);
-    const isAdmin = getIsAdmin(userRoles);
+    const queryClient = new QueryClient();
+    await queryClient.prefetchQuery('allGroups', () =>
+      fetchAllGroups(sessionCookie)
+    );
+    await queryClient.prefetchQuery('allUsers', () =>
+      fetchAllUsers(sessionCookie)
+    );
 
     return {
       props: {
+        dehydratedState: dehydrate(queryClient),
         isAdmin,
-        groups,
-        users,
       },
     };
   },
 });
 
-export default Users;
+export default withAdmin(Users);

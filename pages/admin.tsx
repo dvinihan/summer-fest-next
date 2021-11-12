@@ -1,4 +1,3 @@
-import React from 'react';
 import { useRouter } from 'next/router';
 import {
   Button,
@@ -19,30 +18,20 @@ import Group from '../src/types/Group';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
 import { PageHeader } from '../src/components/PageHeader';
-import AdminError from '../src/components/AdminError';
-import { fetchCampersInGroup } from '../src/queries/campers';
-import { fetchGroupsById } from '../src/queries/groups';
-import Camper from '../src/types/Camper';
-import { getIsAdmin } from '../src/helpers';
-import { fetchUserRoles } from '../src/queries/users';
+import { fetchAllGroups } from '../src/queries/groups';
+import { getIsAdminFromContext } from '../src/helpers';
+import { dehydrate, QueryClient, useQuery } from 'react-query';
+import { withAdmin } from '../src/components/withAdmin';
 
-type Props = {
-  isAdmin: boolean;
-  campers: Camper[];
-  groups: Group[];
-};
-
-const Admin = ({ isAdmin, campers = [], groups = [] }: Props) => {
-  if (!isAdmin) {
-    return <AdminError />;
-  }
-
+const Admin = () => {
   const router = useRouter();
   const theme = useTheme();
 
+  const { data: groups = [] } = useQuery('allGroups', () => fetchAllGroups());
+
   return (
     <Container maxWidth="xl">
-      <PageHeader isAdmin={isAdmin} />
+      <PageHeader />
       <Grid
         container
         direction="column"
@@ -114,7 +103,7 @@ const Admin = ({ isAdmin, campers = [], groups = [] }: Props) => {
 
         <Grid item>
           <Button
-            onClick={() => downloadCSV({ groups, campers, isAdmin: true })}
+            onClick={() => downloadCSV({ groups, isAdmin: true })}
             type="button"
           >
             <Paper sx={{ padding: theme.spacing(1) }}>
@@ -130,36 +119,22 @@ const Admin = ({ isAdmin, campers = [], groups = [] }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const sessionCookie = context.req.headers.cookie;
-    const userRoles = await fetchUserRoles({
-      sessionCookie,
-    });
-    const isAdmin = getIsAdmin(userRoles);
+    const isAdmin = getIsAdminFromContext(context);
 
-    if (!isAdmin) {
-      return {
-        props: {
-          isAdmin,
-        },
-      };
+    const queryClient = new QueryClient();
+    if (isAdmin) {
+      await queryClient.prefetchQuery('allGroups', () =>
+        fetchAllGroups(sessionCookie)
+      );
     }
-
-    const [campers, groups] = await Promise.all([
-      fetchCampersInGroup({
-        sessionCookie,
-      }),
-      fetchGroupsById({
-        sessionCookie,
-      }),
-    ]);
 
     return {
       props: {
+        dehydratedState: dehydrate(queryClient),
         isAdmin,
-        campers,
-        groups,
       },
     };
   },
 });
 
-export default Admin;
+export default withAdmin(Admin);
