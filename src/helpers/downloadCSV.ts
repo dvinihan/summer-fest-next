@@ -1,4 +1,4 @@
-import { fetchCampersInGroup } from '../queries/campers';
+import { fetchAllCampers, fetchCampersInGroup } from '../queries/campers';
 import { fetchAllUsers } from '../queries/users';
 import { Camper } from '../types/Camper';
 import { Group } from '../types/Group';
@@ -59,7 +59,7 @@ export const downloadCSV = async ({
   let csvFile;
   if (isAdmin) {
     const { data: users } = await fetchAllUsers();
-    const { data: campers } = await fetchCampersInGroup();
+    const { data: campers } = await fetchAllCampers();
     csvFile =
       convertArrayOfObjectsToCSV(users, isAdmin) +
       convertArrayOfObjectsToCSV(groups, isAdmin) +
