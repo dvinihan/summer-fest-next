@@ -3,6 +3,7 @@ import { Button, Grid, InputLabel } from '@mui/material';
 import ImageViewer from 'react-simple-image-viewer';
 import { useMutation } from 'react-query';
 import { downloadCovidImage } from '../queries/images';
+import Image from 'next/image';
 
 interface Props {
   oldImageFileName: string;
@@ -30,7 +31,7 @@ const CovidImages = ({
     if (oldImageFileName) {
       mutate({ covidImageFileName: oldImageFileName });
     }
-  }, []);
+  }, [mutate, oldImageFileName]);
   useEffect(() => {
     if (data) {
       const image = `data:image/jpeg;base64,${data}`;
@@ -68,7 +69,7 @@ const CovidImages = ({
 
           {oldCovidImage && (
             <Button onClick={() => setIsViewerOpenOldPic(true)}>
-              <img src={oldCovidImage} width="300px" />
+              <Image src={oldCovidImage} alt="old covid image" width="300px" />
             </Button>
           )}
 
@@ -88,7 +89,11 @@ const CovidImages = ({
           {newCovidImage && (
             <Grid item>
               <Button onClick={() => setIsViewerOpenNewPic(true)}>
-                <img src={newCovidImage} width="300px" />
+                <Image
+                  src={newCovidImage}
+                  alt="new covid image"
+                  width="300px"
+                />
               </Button>
             </Grid>
           )}
