@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Camper from '../types/Camper';
+import { Camper } from '../types/Camper';
 import {
   Button,
   Container,
@@ -19,7 +19,7 @@ import { getIsAdminFromUser } from '../helpers';
 
 interface Props {
   initialCamper: Camper;
-  onSave: ({ camper }: { camper: Camper }) => void;
+  onSave: ({ editedCamper }: { editedCamper: Camper }) => void;
   onDeleteCamper?: () => void;
 }
 
@@ -42,7 +42,7 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
   };
 
   const handleSave = () =>
-    onSave({ camper: { ...camper, covid_image: covidImage } });
+    onSave({ editedCamper: { ...camper, covid_image: covidImage } });
 
   return (
     <Container maxWidth="xl">

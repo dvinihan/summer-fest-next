@@ -7,3 +7,11 @@ export const fetchAllUsers = async (sessionCookie?: string) => {
   );
   return data;
 };
+
+export const fetchAllAdmins = async (sessionCookie?: string) => {
+  const { data } = await axios.get(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/admins`,
+    sessionCookie ? { headers: { Cookie: sessionCookie } } : undefined
+  );
+  return data;
+};

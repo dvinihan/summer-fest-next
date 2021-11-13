@@ -1,59 +1,71 @@
 import { Grid } from '@mui/material';
 import { GetServerSidePropsContext } from 'next';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
-import { useMutation } from 'react-query';
+import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
 import CamperForm from '../src/components/CamperForm';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import { fetchCamperById } from '../src/queries/campers';
 import axios from 'axios';
-import Camper from '../src/types/Camper';
+import { Camper } from '../src/types/Camper';
 import PageError from '../src/components/PageError';
 import Loading from '../src/components/Loading';
 import FormError from '../src/components/FormError';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { PageHeader } from '../src/components/PageHeader';
+import { useAppContext } from '../src/context/AppContext';
 
 type Props = {
-  camper?: Camper;
+  camperId?: number;
 };
 
-const CamperEdit = ({ camper }: Props) => {
-  if (!camper) {
-    return <PageError />;
-  }
-
+const CamperEdit = ({ camperId }: Props) => {
   const router = useRouter();
+  const { setToastMessage } = useAppContext();
+
+  const { data: camper } = useQuery<Camper>(`camper ${camperId}`, () =>
+    fetchCamperById(camperId)
+  );
 
   const editCamperMutation = useMutation(
-    async ({ camper }: { camper: Camper }) =>
-      await axios.post('/api/editCamper', camper)
+    async ({ editedCamper }: { editedCamper: Camper }) =>
+      await axios.post('/api/editCamper', editedCamper),
+    {
+      onSuccess: () => {
+        setToastMessage('Camper successfully saved.');
+      },
+    }
   );
   const deleteCamperMutation = useMutation(
-    async () => await axios.delete(`/api/deleteCamper?id=${camper.id}`)
+    async () => await axios.delete(`/api/deleteCamper?id=${camper.id}`),
+    {
+      onSuccess: () => {
+        router.push('/admin');
+        setToastMessage(
+          `Camper ${camper.first_name} ${camper.last_name} successfully deleted.`
+        );
+      },
+    }
   );
 
-  useEffect(() => {
-    if (editCamperMutation.isSuccess || deleteCamperMutation.isSuccess) {
-      router.push(`/groupEdit?id=${camper.group_id}`);
-    }
-  });
-
   const showLoadingModal =
-    editCamperMutation.isLoading ||
-    deleteCamperMutation.isLoading ||
-    editCamperMutation.isSuccess ||
-    deleteCamperMutation.isSuccess;
+    editCamperMutation.isLoading || deleteCamperMutation.isLoading;
+
+  if (!camper || !camperId) {
+    return <PageError />;
+  }
 
   return (
     <>
       {showLoadingModal && <Loading />}
 
+      <PageHeader />
       <Grid
         container
         direction="column"
         justifyContent="center"
         alignItems="center"
         spacing={1}
+        sx={{ marginTop: '80px' }}
       >
         <Grid item>
           <CamperForm
@@ -75,19 +87,19 @@ const CamperEdit = ({ camper }: Props) => {
 export const getServerSideProps = withPageAuthRequired({
   getServerSideProps: async (context: GetServerSidePropsContext) => {
     const sessionCookie = context.req.headers.cookie;
-
     const camperId = getQueryParamId(context.query.id);
-    if (!camperId) {
-      return {
-        props: {},
-      };
-    }
 
-    const camper = await fetchCamperById(camperId, sessionCookie);
+    const queryClient = new QueryClient();
+    if (camperId) {
+      await queryClient.prefetchQuery(`camper ${camperId}`, () =>
+        fetchCamperById(camperId, sessionCookie)
+      );
+    }
 
     return {
       props: {
-        camper,
+        dehydratedState: dehydrate(queryClient),
+        camperId,
       },
     };
   },

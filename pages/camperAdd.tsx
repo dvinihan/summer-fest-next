@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import Camper from '../src/types/Camper';
+import { useEffect } from 'react';
+import { Camper } from '../src/types/Camper';
 import { useRouter } from 'next/router';
 import { useMutation } from 'react-query';
 import axios from 'axios';
@@ -10,16 +10,16 @@ import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import FormError from '../src/components/FormError';
 import { Grid } from '@mui/material';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { PageHeader } from '../src/components/PageHeader';
 
 const CamperAdd = () => {
   const router = useRouter();
   const groupId = getQueryParamId(router.query.groupId);
 
   const { mutate, isSuccess, isLoading, isError } = useMutation(
-    ({ camper }: { camper: Camper }) => axios.post('/api/addCamper', camper)
+    ({ editedCamper }: { editedCamper: Camper }) =>
+      axios.post('/api/addCamper', editedCamper)
   );
-
-  const handleSave = ({ camper }: { camper: Camper }) => mutate({ camper });
 
   useEffect(() => {
     if (isSuccess) {
@@ -35,19 +35,21 @@ const CamperAdd = () => {
     <>
       {showLoading && <Loading />}
 
+      <PageHeader />
       <Grid
         container
         direction="column"
         justifyContent="center"
         alignItems="center"
         spacing={1}
+        sx={{ marginTop: '80px' }}
       >
         <Grid item>
           <CamperForm
             initialCamper={
               new Camper({ group_id: groupId, signed_status: 'Not Sent' })
             }
-            onSave={handleSave}
+            onSave={mutate}
           />
         </Grid>
         <Grid item>{isError && <FormError />}</Grid>

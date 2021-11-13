@@ -14,7 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { downloadCSV } from '../src/helpers/downloadCSV';
-import Group from '../src/types/Group';
+import { Group } from '../src/types/Group';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
 import { PageHeader } from '../src/components/PageHeader';
@@ -27,7 +27,9 @@ const Admin = () => {
   const router = useRouter();
   const theme = useTheme();
 
-  const { data: groups = [] } = useQuery('allGroups', () => fetchAllGroups());
+  const { data: groups = [] } = useQuery<Group[]>('allGroups', () =>
+    fetchAllGroups()
+  );
 
   return (
     <Container maxWidth="xl">

@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useMutation } from 'react-query';
 import downloadImage from '../helpers/downloadImage';
-import Camper from '../types/Camper';
+import { Camper } from '../types/Camper';
 import { downloadCovidImage } from '../queries/images';
 import { useUser } from '@auth0/nextjs-auth0';
 import { getIsAdminFromUser } from '../helpers';

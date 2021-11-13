@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import User from '../src/types/User';
+import { useEffect, useState } from 'react';
+import { User } from '../src/types/User';
 import { useMutation } from 'react-query';
 import axios from 'axios';
 import {
@@ -15,6 +15,10 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { withAdmin } from '../src/components/withAdmin';
+import { GetServerSidePropsContext } from 'next';
+import { getIsAdminFromContext } from '../src/helpers';
+import { PageHeader } from '../src/components/PageHeader';
 
 const UserAdd = () => {
   const router = useRouter();
@@ -32,7 +36,6 @@ const UserAdd = () => {
   });
 
   const handleChange = (e) => {
-    console.log(e);
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
@@ -40,39 +43,37 @@ const UserAdd = () => {
     addUserMutation.mutate();
   };
 
-  const activeUserClearance = getActiveUserClearance();
-
-  // if (activeUserClearance !== 'admin') {
-  //   return (
-  //     <Redirect
-  //       to={{
-  //         pathname: '/'
-  //       }}
-  //     />
-  //   );
-  // }
-
   return (
-    <Paper sx={{ padding: theme.spacing(2) }}>
-      <Container>
-        <Grid container direction="column" spacing={2}>
-          <Grid item>
-            <Grid
-              container
-              justifyContent="center"
-              alignItems="center"
-              spacing={4}
-            >
-              <Grid item>
-                <TextField
-                  label="Username"
-                  onChange={handleChange}
-                  value={user.username}
-                  name="username"
-                />
-              </Grid>
-              <Grid item>
+    <Container>
+      <PageHeader />
+      <Paper sx={{ padding: theme.spacing(2), marginTop: '80px' }}>
+        <Container>
+          <Grid container direction="column" spacing={2}>
+            <Grid item>
+              <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                spacing={4}
+              >
                 <Grid item>
+                  <TextField
+                    label="Username"
+                    onChange={handleChange}
+                    value={user.name}
+                    name="name"
+                  />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    label="Email"
+                    onChange={handleChange}
+                    value={user.email}
+                    name="email"
+                  />
+                </Grid>
+                <Grid item>
+                  {/* <Grid item> */}
                   <InputLabel>Status</InputLabel>
                   <Select
                     label="Status"
@@ -80,33 +81,44 @@ const UserAdd = () => {
                     value={user.status}
                     name="status"
                   >
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="admin">Admin</MenuItem>
-                    <MenuItem value="leader">Leader</MenuItem>
+                    <MenuItem value="None">None</MenuItem>
+                    <MenuItem value="Admin">Admin</MenuItem>
+                    <MenuItem value="Leader">Leader</MenuItem>
                   </Select>
+                  {/* </Grid> */}
+                </Grid>
+              </Grid>
+            </Grid>
+
+            <Grid item>
+              <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Grid item>
+                  <Button variant="contained" onClick={handleSave}>
+                    Save
+                  </Button>
                 </Grid>
               </Grid>
             </Grid>
           </Grid>
-
-          <Grid item>
-            <Grid
-              container
-              justifyContent="center"
-              alignItems="center"
-              spacing={2}
-            >
-              <Grid item>
-                <Button variant="contained" onClick={handleSave}>
-                  Save
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Container>
-    </Paper>
+        </Container>
+      </Paper>
+    </Container>
   );
 };
 
-export default withPageAuthRequired(UserAdd);
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context: GetServerSidePropsContext) => {
+    return {
+      props: {
+        isAdmin: getIsAdminFromContext(context),
+      },
+    };
+  },
+});
+
+export default withAdmin(UserAdd);

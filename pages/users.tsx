@@ -1,8 +1,7 @@
-import React from 'react';
 import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
 import axios from 'axios';
-import Group from '../src/types/Group';
-import User from '../src/types/User';
+import { Group } from '../src/types/Group';
+import { User } from '../src/types/User';
 import {
   Button,
   Paper,
@@ -15,15 +14,23 @@ import {
 } from '@mui/material';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { GetServerSidePropsContext } from 'next';
-import { fetchAllUsers } from '../src/queries/users';
+import { fetchAllAdmins, fetchAllUsers } from '../src/queries/users';
 import { fetchAllGroups } from '../src/queries/groups';
 import { PageHeader } from '../src/components/PageHeader';
 import { getIsAdminFromContext } from '../src/helpers';
 import { withAdmin } from '../src/components/withAdmin';
+import { UserRole } from '../src/types/UserRole';
 
 const Users = () => {
-  const { data: groups = [] } = useQuery('allGroups', () => fetchAllGroups());
-  const { data: users = [] } = useQuery('allUsers', () => fetchAllUsers());
+  const { data: groups = [] } = useQuery<Group[]>('allGroups', () =>
+    fetchAllGroups()
+  );
+  const { data: users = [] } = useQuery<User[]>('allUsers', () =>
+    fetchAllUsers()
+  );
+  const { data: admins = [] } = useQuery<UserRole[]>('allAdmins', () =>
+    fetchAllAdmins()
+  );
 
   const makeAdminMutation = useMutation(
     async ({ userId }: { userId: string }) =>
@@ -56,9 +63,9 @@ const Users = () => {
           </TableHead>
           <TableBody>
             {users.map((user: User) => {
-              const isCurrentUserAdmin = () => {
-                // TODO
-              };
+              const isCurrentUserAdmin = admins.find(
+                (admin) => admin.user_id === user.user_id
+              );
 
               return (
                 <TableRow key={user.user_id}>
@@ -114,6 +121,9 @@ export const getServerSideProps = withPageAuthRequired({
     );
     await queryClient.prefetchQuery('allUsers', () =>
       fetchAllUsers(sessionCookie)
+    );
+    await queryClient.prefetchQuery('allAdmins', () =>
+      fetchAllAdmins(sessionCookie)
     );
 
     return {

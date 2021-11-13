@@ -1,4 +1,3 @@
-import React from 'react';
 import { useRouter } from 'next/router';
 import GroupForm from '../src/components/GroupForm';
 import { Button, Container, Grid, Paper, useTheme } from '@mui/material';
@@ -11,12 +10,13 @@ import Loading from '../src/components/Loading';
 import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
 import { fetchCampersInGroup } from '../src/queries/campers';
 import PageError from '../src/components/PageError';
-import Group from '../src/types/Group';
+import { Group } from '../src/types/Group';
 import CamperTable from '../src/components/CamperTable';
 import axios from 'axios';
 import { useAppContext } from '../src/context/AppContext';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
+import { Camper } from '../src/types/Camper';
 
 type Props = {
   groupId?: number;
@@ -28,10 +28,11 @@ const GroupEdit = ({ groupId }: Props) => {
 
   const { setToastMessage } = useAppContext();
 
-  const { data: campers = [] } = useQuery(`campers - group ${groupId}`, () =>
-    fetchCampersInGroup(groupId)
+  const { data: campers = [] } = useQuery<Camper[]>(
+    `campers - group ${groupId}`,
+    () => fetchCampersInGroup(groupId)
   );
-  const { data: group } = useQuery(`group ${groupId}`, () =>
+  const { data: group } = useQuery<Group>(`group ${groupId}`, () =>
     fetchGroupById(groupId)
   );
 

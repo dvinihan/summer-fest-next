@@ -1,4 +1,10 @@
-class User {
+export enum UserStatus {
+  NONE = 'None',
+  ADMIN = 'Admin',
+  LEADER = 'Leader',
+}
+
+export class User {
   app_metadata: any;
   created_at: string;
   email: string;
@@ -15,6 +21,7 @@ class User {
   updated_at: string;
   user_id: string;
   user_metadata: { group_id: number };
+  status: UserStatus;
 
   constructor(props: any = {}) {
     this.app_metadata = props.app_metadata;
@@ -33,7 +40,6 @@ class User {
     this.updated_at = props.updated_at || '';
     this.user_id = props.user_id || '';
     this.user_metadata = props.user_metadata;
+    this.status = props.status || 'None';
   }
 }
-
-export default User;

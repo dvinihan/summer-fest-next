@@ -1,7 +1,7 @@
 import { fetchCampersInGroup } from '../queries/campers';
 import { fetchAllUsers } from '../queries/users';
-import Camper from '../types/Camper';
-import Group from '../types/Group';
+import { Camper } from '../types/Camper';
+import { Group } from '../types/Group';
 
 const convertArrayOfObjectsToCSV = (
   data: any[],

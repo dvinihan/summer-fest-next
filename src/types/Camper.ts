@@ -1,4 +1,4 @@
-class Camper {
+export class Camper {
   id: number;
   group_id: number;
   first_name: string;
@@ -49,5 +49,3 @@ class Camper {
     this.covid_image_file_name = props.covid_image_file_name || '';
   }
 }
-
-export default Camper;

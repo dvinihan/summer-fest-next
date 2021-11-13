@@ -7,9 +7,9 @@ import {
   TextField,
   useTheme,
 } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getIsAdminFromUser } from '../helpers';
-import Group from '../types/Group';
+import { Group } from '../types/Group';
 import DeleteModal from './DeleteModal';
 
 interface Props {

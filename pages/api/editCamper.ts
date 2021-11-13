@@ -1,6 +1,7 @@
 import { withApiAuthRequired } from '@auth0/nextjs-auth0';
 import { NextApiRequest, NextApiResponse } from 'next';
-import Camper from '../../src/types/Camper';
+import { Camper } from '../../src/types/Camper';
+import { checkEmail } from '../../src/util/checkEmail';
 import connectToDatabase from '../../src/util/mongodb';
 import uploadToS3 from '../../src/util/uploadToS3';
 
@@ -21,17 +22,20 @@ export default withApiAuthRequired(
       uploadToS3(req.body.covid_image, covidFileName);
     }
 
+    const camper = new Camper({
+      ...req.body,
+      covid_image_file_name: covidFileName,
+    });
+
     try {
       await db.collection('campers').updateOne(
         { id: req.body.id },
         {
-          $set: new Camper({
-            ...req.body,
-            covid_image_file_name: covidFileName,
-          }),
+          $set: camper,
         }
       );
       console.log('1 document updated');
+      await checkEmail(db, camper);
     } catch (error) {
       throw error;
     }

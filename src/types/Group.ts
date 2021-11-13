@@ -1,4 +1,4 @@
-class Group {
+export class Group {
   id: number;
   group_name: string;
   leader_name: string;
@@ -9,5 +9,3 @@ class Group {
     this.leader_name = props.leader_name || '';
   }
 }
-
-export default Group;

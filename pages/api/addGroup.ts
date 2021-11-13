@@ -1,6 +1,6 @@
 import { withApiAuthRequired } from '@auth0/nextjs-auth0';
 import { NextApiRequest, NextApiResponse } from 'next';
-import Group from '../../src/types/Group';
+import { Group } from '../../src/types/Group';
 import connectToDatabase from '../../src/util/mongodb';
 
 export default withApiAuthRequired(

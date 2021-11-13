@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import GroupForm from '../src/components/GroupForm';
 import router from 'next/router';
 import Loading from '../src/components/Loading';
@@ -6,7 +6,7 @@ import { Container, Grid } from '@mui/material';
 import FormError from '../src/components/FormError';
 import axios from 'axios';
 import { useMutation } from 'react-query';
-import Group from '../src/types/Group';
+import { Group } from '../src/types/Group';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
