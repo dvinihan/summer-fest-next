@@ -28,35 +28,39 @@ const Users = () => {
   const { data: groups = [] } = useQuery<Group[]>('allGroups', () =>
     fetchAllGroups()
   );
-  const { data: users = [] } = useQuery<User[]>('allUsers', () =>
-    fetchAllUsers()
+  const { data: users = [], refetch: refetchUsers } = useQuery<User[]>(
+    'allUsers',
+    () => fetchAllUsers()
   );
-  const { data: admins = [] } = useQuery<UserRole[]>('allAdmins', () =>
-    fetchAllAdmins()
+  const { data: admins = [], refetch: refetchAdmins } = useQuery<UserRole[]>(
+    'allAdmins',
+    () => fetchAllAdmins()
   );
 
   const makeAdminMutation = useMutation(
-    async ({ userId }: { userId: string }) =>
-      await axios.post(`/api/makeAdmin`, { userId }),
+    async ({ user }: { user: User }) =>
+      await axios.post(`/api/makeAdmin`, { userId: user.user_id }),
     {
-      onSuccess: ({ data }) => {
-        setToastMessage(`${data.userName} is now an Admin.`);
+      onSuccess: (_, { user }) => {
+        refetchAdmins();
+        setToastMessage(`${user.name} is now an Admin.`);
       },
     }
   );
 
   const deleteUserMutation = useMutation(
-    async ({ userId }: { userId: string }) =>
-      await axios.delete(`/api/deleteUser?id=${userId}`),
+    async ({ user }: { user: User }) =>
+      await axios.delete(`/api/deleteUser?id=${user.user_id}`),
     {
-      onSuccess: ({ data }) => {
-        setToastMessage(`${data.userName} deleted.`);
+      onSuccess: (_, { user }) => {
+        refetchUsers();
+        setToastMessage(`${user.name} deleted.`);
       },
     }
   );
 
   const getGroupName = (groups: Group[], user: User) => {
-    const group = groups.find((g) => g.id === user.user_metadata.group_id);
+    const group = groups.find((g) => g.id === user.user_metadata?.group_id);
     return group?.group_name;
   };
 
@@ -91,9 +95,7 @@ const Users = () => {
                     {!isCurrentUserAdmin && (
                       <Button
                         className="table-name"
-                        onClick={() =>
-                          makeAdminMutation.mutate({ userId: user.user_id })
-                        }
+                        onClick={() => makeAdminMutation.mutate({ user })}
                         type="button"
                       >
                         MAKE ADMIN (cannot be undone)
@@ -104,9 +106,7 @@ const Users = () => {
                     {!isCurrentUserAdmin && (
                       <Button
                         className="table-name"
-                        onClick={() =>
-                          deleteUserMutation.mutate({ userId: user.user_id })
-                        }
+                        onClick={() => deleteUserMutation.mutate({ user })}
                         type="button"
                       >
                         DELETE USER (cannot be undone)

@@ -1,10 +1,23 @@
-import { Button, Container, Grid } from '@mui/material';
+import {
+  Button,
+  Container,
+  Grid,
+  Link,
+  Paper,
+  Typography,
+} from '@mui/material';
 import { useRouter } from 'next/router';
 import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
-import { getIsAdminFromContext, getUserGroupId } from '../src/helpers';
+import { getIsAdminFromUser, getUserGroupId } from '../src/helpers';
+import { getSession } from '@auth0/nextjs-auth0';
+import { User } from '../src/types/User';
 
-const Home = () => {
+type Props = {
+  user?: User;
+};
+
+const Home = ({ user }: Props) => {
   const router = useRouter();
 
   const handleLogin = () => {
@@ -20,22 +33,44 @@ const Home = () => {
         justifyContent="center"
         alignItems="center"
         spacing={3}
+        sx={{ marginTop: '80px' }}
       >
-        <Grid item>
-          <div style={{ height: '60px' }}></div>
-        </Grid>
-        <Grid item>
-          <Button variant="contained" onClick={handleLogin}>
-            Log In
-          </Button>
-        </Grid>
+        {user ? (
+          <>
+            <Grid item>
+              <Paper sx={{ padding: '20px' }}>
+                <Typography>Logged in as {user.name}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item>
+              {user.user_metadata?.group_id ? (
+                <Link href={`/groupEdit?id=${user.user_metadata.group_id}`}>
+                  Edit Group {user.user_metadata.group_id}
+                </Link>
+              ) : (
+                <Paper sx={{ padding: '20px' }}>
+                  <Typography>
+                    You are not associated with any groups.
+                  </Typography>
+                </Paper>
+              )}
+            </Grid>
+          </>
+        ) : (
+          <Grid item>
+            <Button variant="contained" onClick={handleLogin}>
+              Log In
+            </Button>
+          </Grid>
+        )}
       </Grid>
     </Container>
   );
 };
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
-  const isAdmin = getIsAdminFromContext(context);
+  const { user } = getSession(context.req, context.res) ?? {};
+  const isAdmin = getIsAdminFromUser(user);
 
   if (isAdmin) {
     return {
@@ -57,7 +92,11 @@ export const getServerSideProps = (context: GetServerSidePropsContext) => {
   }
 
   return {
-    props: {},
+    props: user
+      ? {
+          user,
+        }
+      : {},
   };
 };
 

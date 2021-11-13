@@ -1,19 +1,18 @@
 import { withApiAuthRequired } from '@auth0/nextjs-auth0';
+import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getQueryParamId } from '../../src/helpers/getQueryParamId';
-import connectToDatabase from '../../src/util/mongodb';
+import { fetchAuthTokens } from '../../src/queries/auth';
 
 export default withApiAuthRequired(
   async (req: NextApiRequest, res: NextApiResponse) => {
-    const db = await connectToDatabase();
+    const tokenData = await fetchAuthTokens();
 
-    const userId = getQueryParamId(req.query.id);
-    try {
-      await db.collection('users').deleteOne({ id: userId });
-    } catch (error) {
-      throw error;
-    }
+    const { id } = req.query;
 
+    await axios.delete(
+      `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${id}`,
+      { headers: { authorization: `Bearer ${tokenData.access_token}` } }
+    );
     res.json({});
   }
 );
