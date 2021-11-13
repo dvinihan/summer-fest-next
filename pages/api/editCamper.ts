@@ -34,12 +34,15 @@ export default withApiAuthRequired(
           $set: camper,
         }
       );
-      console.log('1 document updated');
-      await checkEmail(db, camper);
     } catch (error) {
       throw error;
     }
 
-    res.json({});
+    try {
+      await checkEmail(db, camper);
+      res.json({});
+    } catch (error) {
+      res.json({ emailError: error.message });
+    }
   }
 );

@@ -16,7 +16,7 @@ export const fetchCamperById = async (
   sessionCookie?: string
 ) => {
   const { data: camperList } = await axios.get(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/campers?camperId=${camperId}`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/campers?id=${camperId}`,
     sessionCookie ? { headers: { Cookie: sessionCookie } } : undefined
   );
   return camperList[0];

@@ -7,8 +7,14 @@ export default withApiAuthRequired(
   async (req: NextApiRequest, res: NextApiResponse) => {
     const db = await connectToDatabase();
 
+    const camperId = getQueryParamId(req.query.id);
     const groupId = getQueryParamId(req.query.groupId);
-    const query = groupId ? { group_id: groupId } : {};
+
+    const query = camperId
+      ? { id: camperId }
+      : groupId
+      ? { group_id: groupId }
+      : {};
 
     const campers = await db.collection('campers').find(query).toArray();
     res.json(JSON.parse(JSON.stringify(campers)));

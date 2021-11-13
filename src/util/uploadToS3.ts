@@ -22,8 +22,9 @@ const uploadToS3 = async (fileContent: string, fileName: string) => {
   s3.upload(params, (err, data) => {
     if (err) {
       console.log(err);
+    } else {
+      console.log(`File uploaded successfully. ${data.Location}`);
     }
-    console.log(`File uploaded successfully. ${data.Location}`);
   });
 };
 

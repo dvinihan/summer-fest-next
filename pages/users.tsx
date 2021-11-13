@@ -20,8 +20,11 @@ import { PageHeader } from '../src/components/PageHeader';
 import { getIsAdminFromContext } from '../src/helpers';
 import { withAdmin } from '../src/components/withAdmin';
 import { UserRole } from '../src/types/UserRole';
+import { useAppContext } from '../src/context/AppContext';
 
 const Users = () => {
+  const { setToastMessage } = useAppContext();
+
   const { data: groups = [] } = useQuery<Group[]>('allGroups', () =>
     fetchAllGroups()
   );
@@ -34,12 +37,22 @@ const Users = () => {
 
   const makeAdminMutation = useMutation(
     async ({ userId }: { userId: string }) =>
-      await axios.post(`/api/makeAdmin`, { userId })
+      await axios.post(`/api/makeAdmin`, { userId }),
+    {
+      onSuccess: ({ data }) => {
+        setToastMessage(`${data.userName} is now an Admin.`);
+      },
+    }
   );
 
   const deleteUserMutation = useMutation(
     async ({ userId }: { userId: string }) =>
-      await axios.delete(`/api/deleteUser?id=${userId}`)
+      await axios.delete(`/api/deleteUser?id=${userId}`),
+    {
+      onSuccess: ({ data }) => {
+        setToastMessage(`${data.userName} deleted.`);
+      },
+    }
   );
 
   const getGroupName = (groups: Group[], user: User) => {

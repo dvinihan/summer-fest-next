@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Camper } from '../src/types/Camper';
 import { useRouter } from 'next/router';
 import { useMutation } from 'react-query';
@@ -11,29 +10,37 @@ import FormError from '../src/components/FormError';
 import { Grid } from '@mui/material';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
+import { useAppContext } from '../src/context/AppContext';
+import { GetServerSidePropsContext } from 'next';
 
-const CamperAdd = () => {
+type Props = {
+  groupId?: number;
+};
+
+const CamperAdd = ({ groupId }: Props) => {
   const router = useRouter();
-  const groupId = getQueryParamId(router.query.groupId);
+  const { setToastMessage } = useAppContext();
 
-  const { mutate, isSuccess, isLoading, isError } = useMutation(
-    ({ editedCamper }: { editedCamper: Camper }) =>
-      axios.post('/api/addCamper', editedCamper)
-  );
+  const { mutate, isLoading, isError } = useMutation(
+    async ({ editedCamper }: { editedCamper: Camper }) =>
+      await axios.post('/api/addCamper', editedCamper),
+    {
+      onSuccess: ({ data }) => {
+        const toastMessage = data.emailError
+          ? 'Camper successfully saved, but there was a problem sending a waiver through email. Please try again later.'
+          : 'Camper successfully saved.';
 
-  useEffect(() => {
-    if (isSuccess) {
-      router.push(`/groupEdit?id=${groupId}`);
+        router.push(`camperEdit?id=${data.id}`);
+        setToastMessage(toastMessage);
+      },
     }
-  });
-
-  const showLoading = isLoading || isSuccess;
+  );
 
   return !groupId ? (
     <PageError />
   ) : (
     <>
-      {showLoading && <Loading />}
+      {isLoading && <Loading />}
 
       <PageHeader />
       <Grid
@@ -58,4 +65,14 @@ const CamperAdd = () => {
   );
 };
 
-export default withPageAuthRequired(CamperAdd);
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context: GetServerSidePropsContext) => {
+    return {
+      props: {
+        groupId: getQueryParamId(context.query.groupId),
+      },
+    };
+  },
+});
+
+export default CamperAdd;

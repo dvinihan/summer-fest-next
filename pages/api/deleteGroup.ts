@@ -10,7 +10,6 @@ export default withApiAuthRequired(
     const groupId = getQueryParamId(req.query.id);
     try {
       await db.collection('groups').deleteOne({ id: groupId });
-      console.log('1 document deleted');
     } catch (error) {
       throw error;
     }

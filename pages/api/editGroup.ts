@@ -15,7 +15,6 @@ export default withApiAuthRequired(
       await db
         .collection('groups')
         .updateOne({ id: req.body.id }, { $set: new Group(req.body) });
-      console.log('1 document updated');
     } catch (error) {
       throw error;
     }

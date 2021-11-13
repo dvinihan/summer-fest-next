@@ -57,7 +57,6 @@ export const checkEmail = async (db: Db, camper: Camper) => {
     await db
       .collection('campers')
       .updateOne({ id: camper.id }, { $set: { signed_status: 'Emailed' } });
-    console.log('1 document updated');
   } catch (error) {
     throw error;
   }

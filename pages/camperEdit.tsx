@@ -30,8 +30,12 @@ const CamperEdit = ({ camperId }: Props) => {
     async ({ editedCamper }: { editedCamper: Camper }) =>
       await axios.post('/api/editCamper', editedCamper),
     {
-      onSuccess: () => {
-        setToastMessage('Camper successfully saved.');
+      onSuccess: ({ data }) => {
+        const toastMessage = data.emailError
+          ? 'Camper successfully saved, but there was a problem sending a waiver through email. Please try again later.'
+          : 'Camper successfully saved.';
+
+        setToastMessage(toastMessage);
       },
     }
   );

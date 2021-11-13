@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import GroupForm from '../src/components/GroupForm';
 import router from 'next/router';
 import Loading from '../src/components/Loading';
@@ -12,29 +11,24 @@ import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
 import { getIsAdminFromContext } from '../src/helpers';
 import { withAdmin } from '../src/components/withAdmin';
+import { useAppContext } from '../src/context/AppContext';
 
 const GroupAdd = () => {
-  const {
-    mutate,
-    data: addGroupAxiosResponse,
-    isSuccess,
-    isLoading,
-    isError,
-  } = useMutation(
-    async (newGroup: Group) => await axios.post('/api/addGroup', newGroup)
-  );
+  const { setToastMessage } = useAppContext();
 
-  useEffect(() => {
-    if (addGroupAxiosResponse?.data?.id) {
-      router.push(`groupEdit?id=${addGroupAxiosResponse.data.id}`);
+  const { mutate, isLoading, isError } = useMutation(
+    async (newGroup: Group) => await axios.post('/api/addGroup', newGroup),
+    {
+      onSuccess: ({ data }) => {
+        router.push(`groupEdit?id=${data.id}`);
+        setToastMessage('Group successfully saved.');
+      },
     }
-  }, [addGroupAxiosResponse.data.id]);
-
-  const showLoadingModal = isLoading || isSuccess;
+  );
 
   return (
     <Container>
-      {showLoadingModal && <Loading />}
+      {isLoading && <Loading />}
 
       <PageHeader />
       <Grid

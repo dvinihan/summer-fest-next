@@ -37,7 +37,8 @@ const GroupEdit = ({ groupId }: Props) => {
   );
 
   const editGroupMutation = useMutation(
-    (editedGroup: Group) => axios.post(`/api/editGroup`, editedGroup),
+    async (editedGroup: Group) =>
+      await axios.post(`/api/editGroup`, editedGroup),
     {
       onSuccess: () => {
         setToastMessage('Group successfully saved.');
@@ -45,7 +46,7 @@ const GroupEdit = ({ groupId }: Props) => {
     }
   );
   const deleteGroupMutation = useMutation(
-    () => axios.delete(`/api/deleteGroup?id=${group.id}`),
+    async () => await axios.delete(`/api/deleteGroup?id=${group.id}`),
     {
       onSuccess: () => {
         router.push('/admin');

@@ -12,8 +12,6 @@ export default withApiAuthRequired(
         .collection('groups')
         .insertOne(new Group(req.body));
 
-      console.log('inserted group with id object', insertedId);
-
       const group = await db.collection('groups').findOne({ _id: insertedId });
 
       res.json({ id: group.id });

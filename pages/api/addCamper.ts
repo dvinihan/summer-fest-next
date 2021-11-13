@@ -27,17 +27,14 @@ export default withApiAuthRequired(
       covid_image_file_name: covidFileName,
     });
 
+    const { insertedId } = await db.collection('campers').insertOne(newCamper);
+    const camper = await db.collection('campers').findOne({ _id: insertedId });
+
     try {
-      await db.collection('campers').insertOne(newCamper);
-
-      console.log('1 document inserted');
-
       await checkEmail(db, newCamper);
+      res.json({ id: camper.id });
     } catch (error) {
-      console.log(error);
-      throw error;
+      res.json({ id: camper.id, emailError: error.message });
     }
-
-    res.json({});
   }
 );
