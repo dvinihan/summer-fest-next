@@ -12,7 +12,7 @@ export default withApiAuthRequired(
     await axios.post(
       `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users`,
       {
-        connection: 'Username-Password-Authentication',
+        connection: process.env.AUTH0_DATABASE_CONNECTION,
         name,
         email,
       },
