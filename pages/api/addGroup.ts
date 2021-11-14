@@ -14,7 +14,7 @@ export default withApiAuthRequired(
 
       const group = await db.collection('groups').findOne({ _id: insertedId });
 
-      res.json({ id: group.id });
+      res.json(group);
     } catch (error) {
       throw error;
     }
