@@ -21,14 +21,22 @@ import { getIsAdminFromContext } from '../src/helpers';
 import { dehydrate, QueryClient, useQuery } from 'react-query';
 import { withAdmin } from '../src/components/withAdmin';
 import { useNavigate } from '../src/hooks/useNavigate';
+import { useAppContext } from '../src/context/AppContext';
 
 const Admin = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { setIsLoading } = useAppContext();
 
   const { data: groups = [] } = useQuery<Group[]>('allGroups', () =>
     fetchAllGroups()
   );
+
+  const handleDownloadCsv = async () => {
+    setIsLoading(true);
+    await downloadCSV({ groups, isAdmin: true });
+    setIsLoading(false);
+  };
 
   return (
     <Container maxWidth="xl">
@@ -107,10 +115,7 @@ const Admin = () => {
         </Grid>
 
         <Grid item>
-          <Button
-            onClick={() => downloadCSV({ groups, isAdmin: true })}
-            type="button"
-          >
+          <Button onClick={handleDownloadCsv} type="button">
             <Paper sx={{ padding: theme.spacing(1) }}>
               <Container>Download All Data</Container>
             </Paper>

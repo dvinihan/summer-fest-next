@@ -1,6 +1,5 @@
 import {
   Button,
-  Link,
   Paper,
   Table,
   TableBody,
@@ -16,6 +15,7 @@ import { downloadCovidImage } from '../queries/images';
 import { useUser } from '@auth0/nextjs-auth0';
 import { getIsAdminFromUser } from '../helpers';
 import { useMakeMutationOptions } from '../hooks/useMakeMutationOptions';
+import { useNavigate } from '../hooks/useNavigate';
 
 interface Props {
   campers: Camper[];
@@ -25,6 +25,7 @@ const CamperTable = ({ campers }: Props) => {
   const { user } = useUser();
   const isAdmin = getIsAdminFromUser(user);
   const makeMutationOptions = useMakeMutationOptions();
+  const navigate = useNavigate();
 
   const { mutate } = useMutation(
     downloadCovidImage,
@@ -71,7 +72,9 @@ const CamperTable = ({ campers }: Props) => {
           {campers.map((camper: Camper) => (
             <TableRow key={camper.id}>
               <TableCell>
-                <Link href={`/camperEdit?id=${camper.id}`}>Edit</Link>
+                <Button onClick={() => navigate(`/camperEdit?id=${camper.id}`)}>
+                  Edit
+                </Button>
               </TableCell>
               <TableCell>{camper.first_name}</TableCell>
               <TableCell>{camper.last_name}</TableCell>

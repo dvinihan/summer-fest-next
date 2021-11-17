@@ -8,13 +8,19 @@ export default withApiAuthRequired(
     try {
       const db = await connectToDatabase();
 
-      const { insertedId } = await db
-        .collection('groups')
-        .insertOne(new Group(req.body));
+      const { count } = await db
+        .collection('counters')
+        .findOne({ collection: 'groups' });
+      const newCount = count + 1;
 
-      const group = await db.collection('groups').findOne({ _id: insertedId });
+      const newGroup = new Group({ ...req.body, id: newCount });
 
-      res.json(group);
+      await db.collection('groups').insertOne(newGroup);
+      await db
+        .collection('counters')
+        .updateOne({ collection: 'groups' }, { $set: { count: newCount } });
+
+      res.json({ id: newCount });
     } catch (error) {
       throw error;
     }

@@ -1,84 +1,95 @@
-import { fetchAllCampers, fetchCampersInGroup } from '../queries/campers';
+import { fetchAllCampers } from '../queries/campers';
 import { fetchAllUsers } from '../queries/users';
 import { Camper } from '../types/Camper';
 import { Group } from '../types/Group';
 
-const convertArrayOfObjectsToCSV = (
-  data: any[],
-  isAdmin: boolean,
-  groups?: Group[]
-) => {
-  if (data && data.length > 0) {
-    let keys = Object.keys(data[0]);
-    keys = keys.filter((key) => key !== 'password');
+const buildSingleRowString = (keys: string[], item: any, groupName?: string) =>
+  keys
+    .map((key) => item[key])
+    .join(',')
+    .concat(groupName ? `,${groupName}` : '');
 
-    if (!isAdmin) {
-      keys = keys.filter((key) => key !== 'room');
-    }
-
-    if (groups) {
-      keys.push('group_name');
-    }
-
-    let result = '';
-    result += keys.join(',');
-    result += '\n';
-
-    data.forEach((item) => {
-      let counter = 0;
-      keys.forEach((key) => {
-        if (counter > 0) {
-          result += ',';
-        }
-
-        if (groups && key === 'group_name') {
-          result += groups.find(
-            (group) => group.id === item.group_id
-          ).group_name;
-        } else {
-          result += item[key];
-        }
-        counter++;
-      });
-      result += '\n';
-    });
-    return result;
+const convertDataToCsvString = ({
+  data = [],
+  filterFn,
+  groups,
+}: {
+  data: any[];
+  filterFn?: (key: string) => boolean;
+  groups?: Group[];
+}) => {
+  if (data.length === 0) {
+    return '';
   }
-  return null;
+
+  const dataFilterFunction = filterFn ?? (() => true);
+  const keysToInclude = Object.keys(data[0])
+    .filter(dataFilterFunction)
+    .filter((key) => key !== '_id');
+
+  const headerRowString = keysToInclude
+    .join(',')
+    .concat(groups ? ',group_name' : '');
+
+  const dataRowStrings = data.map((item) => {
+    const groupName = groups?.find(
+      (group) => group.id === item.group_id
+    )?.group_name;
+
+    return buildSingleRowString(keysToInclude, item, groupName);
+  });
+
+  return [headerRowString, ...dataRowStrings].join('\n');
 };
 
 export const downloadCSV = async ({
   groups,
   campers,
-  isAdmin = false,
+  isAdmin,
 }: {
   groups?: Group[];
   campers?: Camper[];
   isAdmin?: boolean;
 }) => {
-  let csvFile;
+  const csvStrings = [];
+
+  // add users and groups
   if (isAdmin) {
-    const { data: users } = await fetchAllUsers();
-    const { data: campers } = await fetchAllCampers();
-    csvFile =
-      convertArrayOfObjectsToCSV(users, isAdmin) +
-      convertArrayOfObjectsToCSV(groups, isAdmin) +
-      convertArrayOfObjectsToCSV(campers, isAdmin, groups);
-  } else {
-    csvFile = convertArrayOfObjectsToCSV(campers, isAdmin);
+    const users = await fetchAllUsers();
+    const userDataString = convertDataToCsvString({
+      data: users,
+      filterFn: (key: string) =>
+        [
+          'created_at',
+          'email',
+          'email_verified',
+          'family_name',
+          'given_name',
+        ].includes(key),
+    });
+    const groupsDataString = convertDataToCsvString({ data: groups });
+    csvStrings.push(userDataString, groupsDataString);
   }
 
-  const element = document.createElement('a');
-  element.setAttribute(
-    'href',
-    `data:text/plain;charset=utf-8${encodeURIComponent(csvFile)}`
-  );
-  element.setAttribute('download', 'registration-data.csv');
-  element.style.display = 'none';
-  if (typeof element.download !== 'undefined') {
-    // browser has support - process the download
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  // add campers
+  if (!campers) {
+    campers = await fetchAllCampers();
   }
+  const campersDataString = convertDataToCsvString({
+    data: campers,
+    filterFn: (key: string) => !(!isAdmin && key === 'room'),
+    groups,
+  });
+  csvStrings.push(campersDataString);
+
+  const csvStringWithNewlines = csvStrings.join('\n\n');
+
+  const encodedUri = encodeURI(
+    'data:text/csv;charset=utf-8,' + csvStringWithNewlines
+  );
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', 'registration-data.csv');
+  document.body.appendChild(link); // Required for FF
+  link.click();
 };

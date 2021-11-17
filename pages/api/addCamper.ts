@@ -22,19 +22,27 @@ export default withApiAuthRequired(
       uploadToS3(req.body.covid_image, covidFileName);
     }
 
+    const { count } = await db
+      .collection('counters')
+      .findOne({ collection: 'campers' });
+    const newCount = count + 1;
+
     const newCamper = new Camper({
       ...req.body,
+      id: newCount,
       covid_image_file_name: covidFileName,
     });
 
-    const { insertedId } = await db.collection('campers').insertOne(newCamper);
-    const camper = await db.collection('campers').findOne({ _id: insertedId });
+    await db.collection('campers').insertOne(newCamper);
+    await db
+      .collection('counters')
+      .updateOne({ collection: 'campers' }, { $set: { count: newCount } });
 
     try {
       await checkEmail(db, newCamper);
-      res.json({ id: camper.id });
+      res.json({ id: newCount });
     } catch (error) {
-      res.json({ id: camper.id, emailError: error.message });
+      res.json({ id: newCount, emailError: error.message });
     }
   }
 );

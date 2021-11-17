@@ -13,7 +13,7 @@ export const checkEmail = async (db: Db, camper: Camper) => {
 
   const { count } = await db
     .collection('counters')
-    .findOne({ value: 'waivers' });
+    .findOne({ collection: 'waivers' });
   const newCount = count + 1;
 
   try {
@@ -45,10 +45,7 @@ export const checkEmail = async (db: Db, camper: Camper) => {
 
     await db
       .collection('counters')
-      .updateOne(
-        { value: 'waivers' },
-        { $set: { value: 'waivers', count: newCount } }
-      );
+      .updateOne({ collection: 'waivers' }, { $set: { count: newCount } });
   } catch (error) {
     throw error;
   }
