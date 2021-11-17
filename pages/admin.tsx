@@ -1,9 +1,7 @@
-import { useRouter } from 'next/router';
 import {
   Button,
   Container,
   Grid,
-  Link,
   Paper,
   Table,
   TableBody,
@@ -22,10 +20,11 @@ import { fetchAllGroups } from '../src/queries/groups';
 import { getIsAdminFromContext } from '../src/helpers';
 import { dehydrate, QueryClient, useQuery } from 'react-query';
 import { withAdmin } from '../src/components/withAdmin';
+import { useNavigate } from '../src/hooks/useNavigate';
 
 const Admin = () => {
-  const router = useRouter();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const { data: groups = [] } = useQuery<Group[]>('allGroups', () =>
     fetchAllGroups()
@@ -60,7 +59,11 @@ const Admin = () => {
                   group.id === 1 ? null : (
                     <TableRow key={group.id}>
                       <TableCell>
-                        <Link href={`/groupEdit?id=${group.id}`}>Edit</Link>
+                        <Button
+                          onClick={() => navigate(`/groupEdit?id=${group.id}`)}
+                        >
+                          Edit
+                        </Button>
                       </TableCell>
                       <TableCell>{group.group_name}</TableCell>
                       <TableCell>{group.leader_name}</TableCell>
@@ -80,21 +83,21 @@ const Admin = () => {
             spacing={2}
           >
             <Grid item>
-              <Button onClick={() => router.push('/groupAdd')}>
+              <Button onClick={() => navigate('/groupAdd')}>
                 <Paper sx={{ padding: theme.spacing(1) }}>
                   <Container>Add a Group</Container>
                 </Paper>
               </Button>
             </Grid>
             <Grid item>
-              <Button onClick={() => router.push('/userAdd')}>
+              <Button onClick={() => navigate('/userAdd')}>
                 <Paper sx={{ padding: theme.spacing(1) }}>
                   <Container>Add a User</Container>
                 </Paper>
               </Button>
             </Grid>
             <Grid item>
-              <Button onClick={() => router.push('/users')}>
+              <Button onClick={() => navigate('/users')}>
                 <Paper sx={{ padding: theme.spacing(1) }}>
                   <Container>View All Users</Container>
                 </Paper>

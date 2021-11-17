@@ -4,6 +4,7 @@ import ImageViewer from 'react-simple-image-viewer';
 import { useMutation } from 'react-query';
 import { downloadCovidImage } from '../queries/images';
 import Image from 'next/image';
+import { useMakeMutationOptions } from '../hooks/useMakeMutationOptions';
 
 interface Props {
   oldImageFileName: string;
@@ -23,8 +24,12 @@ const CovidImages = ({
   const [isViewerOpenNewPic, setIsViewerOpenNewPic] = useState(false);
   const [oldCovidImage, setOldCovidImage] = useState('');
   const [newCovidImage, setNewCovidImage] = useState('');
+  const makeMutationOptions = useMakeMutationOptions();
 
-  const { mutate, data } = useMutation(downloadCovidImage);
+  const { mutate, data } = useMutation(
+    downloadCovidImage,
+    makeMutationOptions()
+  );
 
   // on first load, download file if it already exists
   useEffect(() => {

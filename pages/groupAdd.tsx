@@ -1,6 +1,4 @@
 import GroupForm from '../src/components/GroupForm';
-import router from 'next/router';
-import Loading from '../src/components/Loading';
 import { Container, Grid } from '@mui/material';
 import FormError from '../src/components/FormError';
 import axios from 'axios';
@@ -11,25 +9,25 @@ import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
 import { getIsAdminFromContext } from '../src/helpers';
 import { withAdmin } from '../src/components/withAdmin';
-import { useAppContext } from '../src/context/AppContext';
+import { useNavigate } from '../src/hooks/useNavigate';
+import { useMakeMutationOptions } from '../src/hooks/useMakeMutationOptions';
 
 const GroupAdd = () => {
-  const { setToastMessage } = useAppContext();
+  const navigate = useNavigate();
+  const makeMutationOptions = useMakeMutationOptions();
 
-  const { mutate, isLoading, isError } = useMutation(
+  const { mutate, isError } = useMutation(
     async (newGroup: Group) => await axios.post('/api/addGroup', newGroup),
-    {
+    makeMutationOptions({
+      successToastMessage: 'Group successfully saved.',
       onSuccess: ({ data }) => {
-        router.push(`groupEdit?id=${data.id}`);
-        setToastMessage('Group successfully saved.');
+        navigate(`groupEdit?id=${data.id}`);
       },
-    }
+    })
   );
 
   return (
     <Container>
-      {isLoading && <Loading />}
-
       <PageHeader />
       <Grid
         container

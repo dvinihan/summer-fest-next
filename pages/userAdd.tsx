@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { User } from '../src/types/User';
 import { useMutation } from 'react-query';
 import axios from 'axios';
@@ -13,34 +13,25 @@ import {
   TextField,
   useTheme,
 } from '@mui/material';
-import { useRouter } from 'next/router';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { withAdmin } from '../src/components/withAdmin';
 import { GetServerSidePropsContext } from 'next';
 import { getIsAdminFromContext } from '../src/helpers';
 import { PageHeader } from '../src/components/PageHeader';
+import { useMakeMutationOptions } from '../src/hooks/useMakeMutationOptions';
 
 const UserAdd = () => {
-  const router = useRouter();
   const theme = useTheme();
   const [user, setUser] = useState(new User());
+  const makeMutationOptions = useMakeMutationOptions();
 
-  const addUserMutation = useMutation(async () => {
-    await axios.post('/api/addUser', user);
-  });
-
-  useEffect(() => {
-    if (addUserMutation.isSuccess) {
-      router.push('/admin');
-    }
-  });
+  const addUserMutation = useMutation(
+    async () => await axios.post('/api/addUser', user),
+    makeMutationOptions({ successNavPath: '/admin' })
+  );
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = () => {
-    addUserMutation.mutate();
   };
 
   return (
@@ -98,7 +89,7 @@ const UserAdd = () => {
                 spacing={2}
               >
                 <Grid item>
-                  <Button variant="contained" onClick={handleSave}>
+                  <Button variant="contained" onClick={addUserMutation.mutate}>
                     Save
                   </Button>
                 </Grid>

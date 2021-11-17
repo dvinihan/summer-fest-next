@@ -15,6 +15,7 @@ import { Camper } from '../types/Camper';
 import { downloadCovidImage } from '../queries/images';
 import { useUser } from '@auth0/nextjs-auth0';
 import { getIsAdminFromUser } from '../helpers';
+import { useMakeMutationOptions } from '../hooks/useMakeMutationOptions';
 
 interface Props {
   campers: Camper[];
@@ -23,12 +24,16 @@ interface Props {
 const CamperTable = ({ campers }: Props) => {
   const { user } = useUser();
   const isAdmin = getIsAdminFromUser(user);
+  const makeMutationOptions = useMakeMutationOptions();
 
-  const { mutate } = useMutation(downloadCovidImage, {
-    onSuccess: (data, { covidImageFileName }) => {
-      downloadImage(covidImageFileName, data);
-    },
-  });
+  const { mutate } = useMutation(
+    downloadCovidImage,
+    makeMutationOptions({
+      onSuccess: (data, { covidImageFileName }) => {
+        downloadImage(covidImageFileName, data);
+      },
+    })
+  );
 
   const handleDownloadCovidImage = (covidImageFileName: string) => {
     mutate({ covidImageFileName });

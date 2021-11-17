@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import GroupForm from '../src/components/GroupForm';
 import { Button, Container, Grid, Paper, useTheme } from '@mui/material';
 import FormError from '../src/components/FormError';
@@ -6,27 +5,26 @@ import { GetServerSidePropsContext } from 'next';
 import { getQueryParamId } from '../src/helpers/getQueryParamId';
 import { fetchGroupById } from '../src/queries/groups';
 import { downloadCSV } from '../src/helpers/downloadCSV';
-import Loading from '../src/components/Loading';
 import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query';
 import { fetchCampersInGroup } from '../src/queries/campers';
 import PageError from '../src/components/PageError';
 import { Group } from '../src/types/Group';
 import CamperTable from '../src/components/CamperTable';
 import axios from 'axios';
-import { useAppContext } from '../src/context/AppContext';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
 import { Camper } from '../src/types/Camper';
+import { useNavigate } from '../src/hooks/useNavigate';
+import { useMakeMutationOptions } from '../src/hooks/useMakeMutationOptions';
 
 type Props = {
   groupId?: number;
 };
 
 const GroupEdit = ({ groupId }: Props) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const theme = useTheme();
-
-  const { setToastMessage } = useAppContext();
+  const makeMutationOptions = useMakeMutationOptions();
 
   const { data: campers = [] } = useQuery<Camper[]>(
     `campers - group ${groupId}`,
@@ -39,24 +37,16 @@ const GroupEdit = ({ groupId }: Props) => {
   const editGroupMutation = useMutation(
     async (editedGroup: Group) =>
       await axios.post(`/api/editGroup`, editedGroup),
-    {
-      onSuccess: () => {
-        setToastMessage('Group successfully saved.');
-      },
-    }
+    makeMutationOptions({ successToastMessage: 'Group successfully saved' })
   );
   const deleteGroupMutation = useMutation(
     async () => await axios.delete(`/api/deleteGroup?id=${group.id}`),
-    {
-      onSuccess: () => {
-        router.push('/admin');
-        setToastMessage(`Group ${group.group_name} successfully deleted.`);
-      },
-    }
-  );
 
-  const showLoadingModal =
-    editGroupMutation.isLoading || deleteGroupMutation.isLoading;
+    makeMutationOptions({
+      successToastMessage: `Group ${group.group_name} successfully deleted.`,
+      successNavPath: '/admin',
+    })
+  );
 
   if (!groupId || !group) {
     return <PageError />;
@@ -64,8 +54,6 @@ const GroupEdit = ({ groupId }: Props) => {
 
   return (
     <Container>
-      {showLoadingModal && <Loading />}
-
       <PageHeader />
       <Grid
         container
@@ -80,7 +68,7 @@ const GroupEdit = ({ groupId }: Props) => {
         <Grid item>
           <GroupForm
             initialGroup={group}
-            onDeleteGroup={deleteGroupMutation.mutate}
+            onDeleteGroup={() => deleteGroupMutation.mutate({})}
             onSave={editGroupMutation.mutate}
           />
         </Grid>
@@ -98,7 +86,7 @@ const GroupEdit = ({ groupId }: Props) => {
         <CamperTable campers={campers} />
 
         <Grid item>
-          <Button onClick={() => router.push(`/camperAdd?groupId=${group.id}`)}>
+          <Button onClick={() => navigate(`/camperAdd?groupId=${group.id}`)}>
             <Paper sx={{ padding: theme.spacing(1) }}>
               <Container>Add a Camper</Container>
             </Paper>

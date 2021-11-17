@@ -1,28 +1,17 @@
-import {
-  Button,
-  Container,
-  Grid,
-  Link,
-  Paper,
-  Typography,
-} from '@mui/material';
-import { useRouter } from 'next/router';
+import { Button, Container, Grid, Paper, Typography } from '@mui/material';
 import { PageHeader } from '../src/components/PageHeader';
 import { GetServerSidePropsContext } from 'next';
 import { getIsAdminFromUser, getUserGroupId } from '../src/helpers';
 import { getSession } from '@auth0/nextjs-auth0';
 import { User } from '../src/types/User';
+import { useNavigate } from '../src/hooks/useNavigate';
 
 type Props = {
   user?: User;
 };
 
 const Home = ({ user }: Props) => {
-  const router = useRouter();
-
-  const handleLogin = () => {
-    router.push('/api/auth/login');
-  };
+  const navigate = useNavigate();
 
   return (
     <Container maxWidth="xl">
@@ -44,9 +33,13 @@ const Home = ({ user }: Props) => {
             </Grid>
             <Grid item>
               {user.user_metadata?.group_id ? (
-                <Link href={`/groupEdit?id=${user.user_metadata.group_id}`}>
+                <Button
+                  onClick={() =>
+                    navigate(`/groupEdit?id=${user.user_metadata.group_id}`)
+                  }
+                >
                   Edit Group {user.user_metadata.group_id}
-                </Link>
+                </Button>
               ) : (
                 <Paper sx={{ padding: '20px' }}>
                   <Typography>
@@ -58,7 +51,10 @@ const Home = ({ user }: Props) => {
           </>
         ) : (
           <Grid item>
-            <Button variant="contained" onClick={handleLogin}>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/api/auth/login')}
+            >
               Log In
             </Button>
           </Grid>
