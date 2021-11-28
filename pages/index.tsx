@@ -51,8 +51,11 @@ const Home = ({ user }: Props) => {
           </>
         ) : (
           <Grid item>
-            <Button variant="contained">
-              <a href="/api/auth/login">Log In</a>
+            <Button
+              onClick={() => navigate('/api/auth/login')}
+              variant="contained"
+            >
+              Log In
             </Button>
           </Grid>
         )}
