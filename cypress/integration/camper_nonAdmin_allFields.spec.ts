@@ -42,7 +42,7 @@ const testCamperB = {
 };
 
 describe('add camper', () => {
-  const baseUrl = `${Cypress.env('auth0BaseUrl')}`;
+  const baseUrl = Cypress.config().baseUrl;
 
   it('login', () => {
     cy.login({
@@ -97,7 +97,7 @@ describe('add camper', () => {
 });
 
 describe('edit camper', () => {
-  const baseUrl = `${Cypress.env('auth0BaseUrl')}`;
+  const baseUrl = Cypress.config().baseUrl;
 
   it('wait for edit page', () => {
     cy.url().should('include', `${baseUrl}/camperEdit?id=`);
