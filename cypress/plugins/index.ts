@@ -31,7 +31,6 @@ const setConfig = (on, config) => {
   config.env.auth0CookieSecret = process.env.AUTH0_SECRET;
   config.env.auth0Scope = process.env.AUTH0_SCOPE;
   config.env.auth0SessionCookieName = 'appSession';
-  config.env.auth0BaseUrl = process.env.AUTH0_BASE_URL;
 
   return config;
 };

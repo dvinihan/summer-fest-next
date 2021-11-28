@@ -29,6 +29,7 @@ export const useMakeMutationOptions = () => {
           setIsLoading(false);
         }),
       onError: () => {
+        setIsLoading(false);
         setToastMessage(
           errorToastMessage || 'There has been an error. Please try again.'
         );
