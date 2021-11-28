@@ -109,7 +109,7 @@ describe('edit camper', () => {
     cy.contains(testCamperB.gender).click();
     cy.get('input[name=birthday]').clear().type(testCamperB.birthday);
     cy.get('input[name=grade_completed]').parent().click();
-    cy.contains(testCamperB.grade_completed).click();
+    cy.get('[data-testid=grade_completed-6]').click();
     cy.get('input[name=allergies]').clear().type(testCamperB.allergies);
     cy.get('input[name=parent_email]').clear().type(testCamperB.parent_email);
     cy.get('input[name=emergency_name]')

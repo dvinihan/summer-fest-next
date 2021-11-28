@@ -104,7 +104,9 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
                       name="grade_completed"
                     >
                       <MenuItem value="">None</MenuItem>
-                      <MenuItem value="6">6</MenuItem>
+                      <MenuItem data-testid="grade_completed-6" value="6">
+                        6
+                      </MenuItem>
                       <MenuItem value="7">7</MenuItem>
                       <MenuItem value="8">8</MenuItem>
                       <MenuItem value="9">9</MenuItem>
