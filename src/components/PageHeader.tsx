@@ -64,8 +64,8 @@ export const PageHeader = () => {
               <ListItemText primary="Admin" />
             </ListItemButton>
           )}
-          <ListItemButton onClick={() => navigate('/api/auth/logout')}>
-            <ListItemText primary="Logout" />
+          <ListItemButton>
+            <a href="/api/auth/logout">Logout</a>
           </ListItemButton>
         </List>
       </Drawer>

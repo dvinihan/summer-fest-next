@@ -2,29 +2,32 @@ import { UseMutationOptions } from 'react-query';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate } from './useNavigate';
 
-export const useMakeMutationOptions =
-  () =>
-  ({
+export const useMakeMutationOptions = () => {
+  const { setToastMessage, setIsLoading } = useAppContext();
+  const navigate = useNavigate();
+
+  return ({
     successNavPath,
     successToastMessage,
     errorToastMessage,
+    onSettled,
     onSuccess,
   }: {
     successNavPath?: string;
     successToastMessage?: string;
     errorToastMessage?: string;
+    onSettled?: () => void;
     onSuccess?: ({ data }: any, { inputs }: any) => void;
   } = {}): UseMutationOptions<any, any, any, any> => {
-    const { setToastMessage, setIsLoading } = useAppContext();
-    const navigate = useNavigate();
-
     return {
       onMutate: () => {
         setIsLoading(true);
       },
-      onSettled: () => {
-        setIsLoading(false);
-      },
+      onSettled:
+        onSettled ??
+        (() => {
+          setIsLoading(false);
+        }),
       onError: () => {
         setToastMessage(
           errorToastMessage || 'There has been an error. Please try again.'
@@ -38,3 +41,4 @@ export const useMakeMutationOptions =
         }),
     };
   };
+};

@@ -26,6 +26,8 @@ const CamperAdd = ({ groupId }: Props) => {
     async ({ editedCamper }: { editedCamper: Camper }) =>
       await axios.post('/api/addCamper', editedCamper),
     makeMutationOptions({
+      // don't stop the loading screen, because page needs to redirect to camperEdit
+      onSettled: () => {},
       onSuccess: ({ data }) => {
         const toastMessage = data.emailError
           ? 'Camper successfully saved, but there was a problem sending a waiver through email. Please try again later.'

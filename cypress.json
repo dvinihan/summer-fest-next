@@ -1,3 +1,4 @@
 {
-  "baseUrl": "https://summer-fest-registration-preview.vercel.app"
+  "baseUrl": "https://summer-fest-registration-preview.vercel.app",
+  "chromeWebSecurity": false
 }

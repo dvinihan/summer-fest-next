@@ -206,8 +206,12 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
                       value={camper.adult_leader}
                       name="adult_leader"
                     >
-                      <MenuItem value="">None</MenuItem>
-                      <MenuItem value="Yes">Yes</MenuItem>
+                      <MenuItem data-testid="adult_leader-no" value="No">
+                        No
+                      </MenuItem>
+                      <MenuItem data-testid="adult_leader-yes" value="Yes">
+                        Yes
+                      </MenuItem>
                     </Select>
                   </Grid>
                   <Grid item>
@@ -217,8 +221,18 @@ const CamperForm = ({ initialCamper, onSave, onDeleteCamper }: Props) => {
                       value={camper.student_leadership_track}
                       name="student_leadership_track"
                     >
-                      <MenuItem value="">None</MenuItem>
-                      <MenuItem value="Yes">Yes</MenuItem>
+                      <MenuItem
+                        data-testid="student_leadership_track-no"
+                        value="No"
+                      >
+                        No
+                      </MenuItem>
+                      <MenuItem
+                        data-testid="student_leadership_track-yes"
+                        value="Yes"
+                      >
+                        Yes
+                      </MenuItem>
                     </Select>
                   </Grid>
                   <Grid item>
