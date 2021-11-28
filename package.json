@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cy:dev": "CYPRESS_BASE_URL=http://localhost:3000 yarn cypress open",
+    "cy:preview": "yarn cypress open"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^1.6.1",
