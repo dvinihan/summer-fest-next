@@ -143,3 +143,13 @@ describe('edit camper', () => {
     });
   });
 });
+
+describe('delete camper', () => {
+  it('delete', () => {
+    cy.contains('delete', { matchCase: false }).click();
+    cy.contains('yes', { matchCase: false }).click();
+    cy.contains(
+      `Camper ${testCamperB.first_name} ${testCamperB.last_name} successfully deleted.`
+    );
+  });
+});

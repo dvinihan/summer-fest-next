@@ -8,11 +8,12 @@ import axios from 'axios';
 import { Camper } from '../src/types/Camper';
 import PageError from '../src/components/PageError';
 import FormError from '../src/components/FormError';
-import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { useUser, withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { PageHeader } from '../src/components/PageHeader';
 import { useAppContext } from '../src/context/AppContext';
 import { useNavigate } from '../src/hooks/useNavigate';
 import { useMakeMutationOptions } from '../src/hooks/useMakeMutationOptions';
+import { getIsAdminFromContext, getIsAdminFromUser } from '../src/helpers';
 
 type Props = {
   camperId?: number;
@@ -23,8 +24,12 @@ const CamperEdit = ({ camperId }: Props) => {
   const { setToastMessage } = useAppContext();
   const makeMutationOptions = useMakeMutationOptions();
 
-  const { data: camper } = useQuery<Camper>(`camper ${camperId}`, () =>
-    fetchCamperById(camperId)
+  const user = useUser();
+  const isAdmin = getIsAdminFromUser(user);
+
+  const { data: camper, refetch: refetchCamper } = useQuery<Camper>(
+    `camper ${camperId}`,
+    () => fetchCamperById(camperId)
   );
 
   const editCamperMutation = useMutation(
@@ -36,6 +41,7 @@ const CamperEdit = ({ camperId }: Props) => {
           ? 'Camper successfully saved, but there was a problem sending a waiver through email. Please try again later.'
           : 'Camper successfully saved.';
 
+        refetchCamper();
         setToastMessage(toastMessage);
       },
     })
@@ -44,7 +50,7 @@ const CamperEdit = ({ camperId }: Props) => {
     async () => await axios.delete(`/api/deleteCamper?id=${camper.id}`),
     {
       onSuccess: () => {
-        navigate('/admin');
+        navigate(isAdmin ? '/admin' : `/groupEdit?id=${camper.group_id}`);
         setToastMessage(
           `Camper ${camper.first_name} ${camper.last_name} successfully deleted.`
         );
