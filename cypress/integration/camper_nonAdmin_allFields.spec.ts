@@ -56,7 +56,10 @@ describe('add camper', () => {
   });
   it('go to add camper page', () => {
     cy.contains('Add a camper', { matchCase: false }).click();
-    cy.url().should('equal', `${baseUrl}/camperAdd?groupId=${testUserGroupId}`);
+    cy.url({ timeout: 6000 }).should(
+      'equal',
+      `${baseUrl}/camperAdd?groupId=${testUserGroupId}`
+    );
   });
   it('fill all fields', () => {
     cy.get('input[name=first_name]').type(testCamperA.first_name);
@@ -100,7 +103,7 @@ describe('edit camper', () => {
   const baseUrl = Cypress.config().baseUrl;
 
   it('wait for edit page', () => {
-    cy.url().should('include', `${baseUrl}/camperEdit?id=`);
+    cy.url({ timeout: 6000 }).should('include', `${baseUrl}/camperEdit?id=`);
   });
   it('edit all fields', () => {
     cy.get('input[name=first_name]').clear().type(testCamperB.first_name);

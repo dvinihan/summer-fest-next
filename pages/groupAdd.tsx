@@ -11,17 +11,19 @@ import { getIsAdminFromContext } from '../src/helpers';
 import { withAdmin } from '../src/components/withAdmin';
 import { useNavigate } from '../src/hooks/useNavigate';
 import { useMakeMutationOptions } from '../src/hooks/useMakeMutationOptions';
+import { useAppContext } from '../src/context/AppContext';
 
 const GroupAdd = () => {
   const navigate = useNavigate();
   const makeMutationOptions = useMakeMutationOptions();
+  const { setToastMessage } = useAppContext();
 
   const { mutate, isError } = useMutation(
     async (newGroup: Group) => await axios.post('/api/addGroup', newGroup),
     makeMutationOptions({
-      successToastMessage: 'Group successfully saved.',
       onSuccess: ({ data }) => {
         navigate(`groupEdit?id=${data.id}`);
+        setToastMessage('Group successfully saved.');
       },
     })
   );

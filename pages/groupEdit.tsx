@@ -16,6 +16,7 @@ import { PageHeader } from '../src/components/PageHeader';
 import { Camper } from '../src/types/Camper';
 import { useNavigate } from '../src/hooks/useNavigate';
 import { useMakeMutationOptions } from '../src/hooks/useMakeMutationOptions';
+import { useAppContext } from '../src/context/AppContext';
 
 type Props = {
   groupId?: number;
@@ -25,19 +26,26 @@ const GroupEdit = ({ groupId }: Props) => {
   const navigate = useNavigate();
   const theme = useTheme();
   const makeMutationOptions = useMakeMutationOptions();
+  const { setToastMessage } = useAppContext();
 
   const { data: campers = [] } = useQuery<Camper[]>(
     `campers - group ${groupId}`,
     () => fetchCampersInGroup(groupId)
   );
-  const { data: group } = useQuery<Group>(`group ${groupId}`, () =>
-    fetchGroupById(groupId)
+  const { data: group, refetch: refetchGroup } = useQuery<Group>(
+    `group ${groupId}`,
+    () => fetchGroupById(groupId)
   );
 
   const editGroupMutation = useMutation(
     async (editedGroup: Group) =>
       await axios.post(`/api/editGroup`, editedGroup),
-    makeMutationOptions({ successToastMessage: 'Group successfully saved' })
+    makeMutationOptions({
+      onSuccess: () => {
+        setToastMessage('Group successfully saved');
+        refetchGroup();
+      },
+    })
   );
   const deleteGroupMutation = useMutation(
     async () => await axios.delete(`/api/deleteGroup?id=${group.id}`),
